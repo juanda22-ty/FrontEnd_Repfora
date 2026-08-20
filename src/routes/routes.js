@@ -367,6 +367,15 @@ export const routes = [
     beforeEnter: auth,
   },
   {
+    path: "/pedagogias",
+    name: "pedagogias",
+    component: () => import("../views/PedagogiasView.vue"),
+    meta: {
+      rol: ["PROGRAMADOR", "COORDINADOR", "USER", "ADMIN", "INSTRUCTOR"],
+    },
+    beforeEnter: auth,
+  },
+  {
     path: "/notifications",
     name: "notifications",
     component: () => import("../views/NotificationsView.vue"),

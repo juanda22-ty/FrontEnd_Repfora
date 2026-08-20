@@ -14,12 +14,11 @@
     </div>
 
     <!-- ─── ADMINISTRATOR / COORDINATOR / PROGRAMMER VIEW (4 Cards) ─── -->
-    <div v-if="isProgramador" class="row justify-center my-row" :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-md'">
+    <div v-if="isProgramador" class="row justify-center my-row cards-container"
+      :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-md'">
       <!-- Card 1: Nueva Planeación -->
-      <div
-        class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'"
-      >
+      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
+        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
         <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
           <div>
             <q-card-section class="card_style q-py-sm">
@@ -50,10 +49,8 @@
       </div>
 
       <!-- Card 2: Programador -->
-      <div
-        class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'"
-      >
+      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
+        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
         <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
           <div>
             <q-card-section class="card_style q-py-sm">
@@ -83,11 +80,40 @@
         </q-card>
       </div>
 
+      <!-- Card 3: Pedagogías -->
+      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
+        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
+        <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
+          <div>
+            <q-card-section class="card_style q-py-sm">
+              <div class="row items-center justify-center">
+                <div class="text-h6 style-text">Pedagogías</div>
+              </div>
+            </q-card-section>
+            <q-separator />
+            <div class="justify-center flex q-my-sm">
+              <img src="/images/competencia.png" class="img-card" alt="Pedagogías" />
+            </div>
+            <q-separator />
+            <q-card-section class="q-pa-md text-center text-body2 text-grey-7">
+              Consulte la información de la planeación pedagógica, incluyendo saberes, criterios, evidencias, ambientes
+              y estrategias didácticas.
+            </q-card-section>
+          </div>
+          <div>
+            <q-separator />
+            <router-link to="/pedagogias" style="text-decoration: none; color: black">
+              <q-card-actions class="column items-center q-mt-sm q-pb-md">
+                <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
+              </q-card-actions>
+            </router-link>
+          </div>
+        </q-card>
+      </div>
+
       <!-- Card 3: Horarios -->
-      <div
-        class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'"
-      >
+      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
+        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
         <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
           <div>
             <q-card-section class="card_style q-py-sm">
@@ -118,10 +144,8 @@
       </div>
 
       <!-- Card 4: Jornadas -->
-      <div
-        class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'"
-      >
+      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
+        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
         <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
           <div>
             <q-card-section class="card_style q-py-sm">
@@ -155,10 +179,7 @@
     <!-- ─── INSTRUCTOR VIEW (2 Columns: Nueva Planeación + Mis Planeaciones) ─── -->
     <div v-else class="row justify-center my-row" :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-md'">
       <!-- Card 1: Nueva Planeación -->
-      <div
-        class="col-12 col-md-5 q-my-md flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'"
-      >
+      <div class="col-12 col-md-5 q-my-md flex" :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
         <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
           <div>
             <q-card-section class="card_style q-py-sm">
@@ -170,7 +191,8 @@
             </q-card-section>
             <q-separator />
             <div class="justify-center flex q-my-md">
-              <img src="/images/calendar.png" class="img-card" alt="Nueva Planeación" style="max-height: 180px; object-fit: contain;" />
+              <img src="/images/calendar.png" class="img-card" alt="Nueva Planeación"
+                style="max-height: 180px; object-fit: contain;" />
             </div>
             <q-separator />
             <q-card-section class="q-pa-md text-center text-body2 text-grey-7">
@@ -189,10 +211,7 @@
       </div>
 
       <!-- Card 2: Mis Planeaciones Guardadas -->
-      <div
-        class="col-12 col-md-7 q-my-md flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'"
-      >
+      <div class="col-12 col-md-7 q-my-md flex" :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
         <q-card square class="my-card-1 shadow-5 full-width column justify-between">
           <div>
             <q-card-section class="card_style q-py-sm text-center">
@@ -203,29 +222,26 @@
               </div>
             </q-card-section>
             <q-separator />
-            
+
             <q-card-section class="q-pa-md scroll" style="max-height: 310px; min-height: 250px;">
               <div v-if="loadingSaved" class="flex flex-center column q-py-xl">
                 <q-spinner-dots color="green-9" size="40px" />
                 <div class="text-caption text-grey-6 q-mt-sm">Cargando tus planeaciones pedagógicas...</div>
               </div>
 
-              <div v-else-if="filteredSavedPlannings.length === 0" class="flex flex-center column q-py-lg text-center text-grey-6" style="min-height: 180px;">
+              <div v-else-if="filteredSavedPlannings.length === 0"
+                class="flex flex-center column q-py-lg text-center text-grey-6" style="min-height: 180px;">
                 <q-icon name="folder_open" size="56px" color="grey-4" class="q-mb-sm" />
                 <div class="text-subtitle2 text-weight-bold text-grey-8">No tienes planeaciones activas aún</div>
                 <div class="text-caption q-mt-xs text-grey-6" style="max-width: 320px; margin-inline: auto;">
-                  Carga los documentos PDF de tu ficha usando el botón <strong>"VER"</strong> de la tarjeta izquierda para generar tu primera planeación pedagógica automática.
+                  Carga los documentos PDF de tu ficha usando el botón <strong>"VER"</strong> de la tarjeta izquierda
+                  para generar tu primera planeación pedagógica automática.
                 </div>
               </div>
 
               <q-list v-else separator class="bg-white">
-                <q-item 
-                  v-for="plan in filteredSavedPlannings" 
-                  :key="plan._id"
-                  class="q-py-sm list-item-custom"
-                  clickable
-                  :to="{ name: 'planning', query: { fiche: plan.pedagogicalPlanning.fiche } }"
-                >
+                <q-item v-for="plan in filteredSavedPlannings" :key="plan._id" class="q-py-sm list-item-custom"
+                  clickable :to="{ name: 'planning', query: { fiche: plan.pedagogicalPlanning.fiche } }">
                   <q-item-section avatar>
                     <q-avatar square color="green-1" text-color="green-10" icon="assignment" size="36px" />
                   </q-item-section>
@@ -240,16 +256,9 @@
                   </q-item-section>
 
                   <q-item-section side>
-                    <q-btn 
-                      flat
-                      round
-                      square
-                      dense
-                      color="green-9"
-                      icon="edit_calendar"
-                      size="sm"
-                    >
-                      <q-tooltip class="bg-green-9 text-weight-bold">Continuar editando planeación pedagógica</q-tooltip>
+                    <q-btn flat round square dense color="green-9" icon="edit_calendar" size="sm">
+                      <q-tooltip class="bg-green-9 text-weight-bold">Continuar editando planeación
+                        pedagógica</q-tooltip>
                     </q-btn>
                   </q-item-section>
                 </q-item>
@@ -347,7 +356,7 @@ const filteredSavedPlannings = computed(() => {
 // Cargar planeaciones guardadas desde base de datos
 const fetchSavedPlannings = async () => {
   if (isProgramador.value) return; // Los programadores no requieren ver este listado directo aquí
-  
+
   loadingSaved.value = true;
   try {
     const data = await PlanningService.getAllPlannings();
@@ -373,6 +382,25 @@ onMounted(() => {
 .card_style {
   background-color: var(--color_card) !important;
   color: var(--color_text_card);
+}
+
+.cards-container {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 1024px) {
+  .cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .cards-container>div {
+    width: 363px;
+    flex: 0 0 363px;
+  }
 }
 
 .img-card {

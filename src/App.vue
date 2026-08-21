@@ -17,16 +17,18 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { storeUser } from "./store/users.js";
 import { useRouter } from "vue-router";
 
 import FooterLayout from "./layouts/footerLayout.vue";
 import HeaderLayout from "./layouts/headerLayout.vue";
 import DrawerLayout from "./layouts/drawerLayout.vue";
+import { useQuasar } from "quasar";
 
 const userStore = storeUser();
 const router = useRouter();
+const $q = useQuasar();
 
 const currentDate = new Date();
 const dateLogin = new Date(userStore.dateLogin);
@@ -36,9 +38,31 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
+watch(
+  () => router.currentRoute.value.fullPath,
+  () => {
+    leftDrawerOpen.value = false;
+  }
+);
+
 const logout = () => {
+  $q.dialog({
+    title: "Cerrar Sesión",
+    message: "¿Está seguro que desea cerrar la sesión?",
+    cancel: { label: "Cancelar", flat: true, color: "grey-7" },
+    ok: { label: "Cerrar Sesión", color: "green-9" },
+    persistent: true,
+  }).onOk(() => {
+    performLogout();
+  });
+};
+
+const performLogout = () => {
   userStore.logoutUser();
   leftDrawerOpen.value = false;
+  sessionStorage.removeItem("storeUser");
+  sessionStorage.clear();
+  localStorage.removeItem("token");
   router.replace({ name: "login" });
 };
 

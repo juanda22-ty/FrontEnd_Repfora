@@ -96,8 +96,6 @@
                   <strong>Ficha:</strong> {{ selectedPlanning.pedagogicalPlanning?.fiche }}
                 </div>
               </div>
-              <q-btn color="white" text-color="green-10" icon="save" label="Guardar cambios" class="text-weight-bolder"
-                @click="savePlanning" />
             </q-card-section>
           </q-card>
 
@@ -125,7 +123,7 @@
                         <th class="base-col hours-col">HORAS DIRECTAS</th>
                         <th class="base-col days-col">DÍAS ASIGNADOS</th>
                         <th v-for="col in extraColumns" :key="col.key" class="extra-header">{{ col.label }}</th>
-                        <th class="base-col actions-col">ACCIONES</th>
+                        <th class="confirm-header">CONFIRMAR REVISION</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -134,20 +132,25 @@
                         <template v-for="(comp, coIdx) in phase.competencies || []" :key="coIdx">
                           <template v-for="(rap, rapIdx) in comp.learningOutcomes || []" :key="rapIdx">
                             <tr v-for="(act, acIdx) in rap.pedagogicalActivities || []" :key="acIdx">
+                              <!--asignacion de fase-->
                               <td class="base-cell phase-cell">{{ phaseLabel(phase.phase) }}</td>
+                              <!--asignacion de competencia-->
                               <td class="base-cell">
                                 <div class="text-weight-bold text-green-10">{{ comp.code || '—' }}</div>
                                 <div class="muted small">{{ comp.name || 'Sin nombre' }}</div>
                               </td>
+                              <!--asignacion de resultado y actividad-->
                               <td class="base-cell">
                                 <div class="text-weight-bolder small">RAP: {{ rap.description || '—' }}</div>
                                 <div class="activity-box"><strong>Actividad:</strong> {{ act.description ||
                                   act.observations || 'Sin descripción' }}</div>
                               </td>
+                              <!--asignacion de horas directas-->
                               <td class="base-cell text-center">
                                 <q-badge outline color="green-9" class="text-weight-bold">{{ directHours(act)
                                   }}h</q-badge>
                               </td>
+                              <!--asignacion de dias programados-->
                               <td class="base-cell">
                                 <div v-if="act.scheduleDetails?.assignedDays?.length">
                                   <div class="text-weight-bold small">{{ act.scheduleDetails.assignedDays.length }}
@@ -158,61 +161,131 @@
                               </td>
 
                               <td v-for="col in extraColumns" :key="col.key" class="extra-cell">
+                                <!--asignacion de actividad de proyecto formativo-->
                                 <template v-if="col.key === 'projectActivity'">
                                   {{ phase.projectActivity || phase.activity || '—' }}
                                 </template>
+
+                                <!--asignacion de saberes de conceptos y principios-->
                                 <template v-else-if="col.key === 'concepts'">
-                                  {{ joinValue(comp.knowledge?.conceptsAndPrinciples ||
-                                    comp.knowledge?.conceptos_y_principios || comp.conceptsAndPrinciples) }}
+                                  <div class="text-preview">
+                                    {{ joinValue(
+                                      comp.knowledge?.conceptsAndPrinciples ||
+                                      comp.knowledge?.conceptos_y_principios ||
+                                      comp.conceptsAndPrinciples
+                                    ) }}
+                                  </div>
+
+                                  <q-btn flat dense no-caps color="green-9" label="Leer más" class="read-more-btn"
+                                    @click="openReadMore(
+                                      joinValue(
+                                        comp.knowledge?.conceptsAndPrinciples ||
+                                        comp.knowledge?.conceptos_y_principios ||
+                                        comp.conceptsAndPrinciples
+                                      ),
+                                      'Saberes de conceptos y principios'
+                                    )" />
+
                                 </template>
+                                <!--asignacion de saberes de proceso-->
                                 <template v-else-if="col.key === 'processes'">
-                                  {{ joinValue(comp.knowledge?.processes || comp.knowledge?.procesos || comp.processes)
-                                  }}
+
+                                  <div class="text-preview">
+                                    {{ joinValue(
+                                      comp.knowledge?.processes ||
+                                      comp.knowledge?.procesos ||
+                                      comp.processes
+                                    ) }}
+                                  </div>
+
+                                  <q-btn flat dense no-caps color="green-9" label="Leer más" class="read-more-btn"
+                                    @click="openReadMore(
+                                      joinValue(
+                                        comp.knowledge?.processes ||
+                                        comp.knowledge?.procesos ||
+                                        comp.processes
+                                      ),
+                                      'Saberes de proceso'
+                                    )" />
+
                                 </template>
+
+                                <!--asignacion de criterios de evaluacion-->
                                 <template v-else-if="col.key === 'criteria'">
-                                  {{ joinValue(rap.evaluationCriteria || comp.evaluationCriteria ||
-                                  comp.criterios_de_evaluacion) }}
+                                  {{ joinValue(
+                                    rap.evaluationCriteria?.length
+                                      ? rap.evaluationCriteria
+                                      : (comp.evaluationCriteria?.length ? comp.evaluationCriteria :
+                                        comp.criterios_de_evaluacion)
+                                  ) }}
                                 </template>
+
+                                <!--asignacion de actividad de aprendizaje-->
                                 <template v-else-if="col.key === 'learningActivity'">
                                   {{ act.description || '—' }}
                                 </template>
+
+                                <!--asignacion de horas de trabajo independiente-->
                                 <template v-else-if="col.key === 'independentHours'">
                                   <q-badge color="green-8" outline>{{ act.hours?.independent ?? 0 }}h</q-badge>
                                 </template>
+
+                                <!--asignacion de descripcion de la evidencia de aprendizaje-->
                                 <template v-else-if="col.key === 'evidence'">
                                   {{ act.evidenceDescription || act.learningEvidence || act.evidence || '—' }}
                                 </template>
+
+                                <!--asignacion de estrategias didacticas activas-->
                                 <template v-else-if="col.key === 'strategies'">
-                                  {{ joinValue(act.didacticStrategies || act.strategies || act.estrategiasDidacticas) }}
+                                  {{ joinValue(act.didacticStrategies || act.strategies || act.estrategiasDidacticas) || '—' }}
                                 </template>
+
+                                <!--asignacion de ambiente de aprendizaje-->
                                 <template v-else-if="col.key === 'environment'">
-                                  {{ act.learningEnvironment?.name || act.learningEnvironment || act.environment?.name
-                                  || act.environment || '—' }}
+                                  {{
+                                    act.learningEnvironment?.name ||
+                                    act.learningEnvironment?.type ||
+                                    (typeof act.learningEnvironment === 'string' ? act.learningEnvironment : null) ||
+                                    act.environment?.type ||
+                                    act.environment?.name ||
+                                    (typeof act.environment === 'string' ? act.environment : null) ||
+                                    '—'
+                                  }}
                                 </template>
+
+                                <!--asignacion de materiales de formacion-->
                                 <template v-else-if="col.key === 'materials'">
                                   {{ joinValue(act.trainingMaterials || act.materials || act.materiales) }}
                                 </template>
+
+                                <!--asignacion de instructor responsable-->
                                 <template v-else-if="col.key === 'responsible'">
                                   {{ act.responsibleInstructor?.name || act.responsibleInstructor ||
                                     act.suggestedInstructor?.name || act.instructors?.name || '—' }}
                                 </template>
+
+                                <!--asignacion de observaciones-->
                                 <template v-else-if="col.key === 'observations'">
                                   {{ act.observations || '—' }}
                                 </template>
                               </td>
+                              <td class="confirm-cell">
 
-                              <td class="base-cell text-center">
-                                <q-btn flat round dense color="green-9" icon="edit"
-                                  @click="openEditor(phase, comp, rap, act)">
-                                  <q-tooltip class="bg-green-9">Editar información pedagógica</q-tooltip>
-                                </q-btn>
+                                <q-btn v-if="!isActivityConfirmed(act)" outline color="green-9" icon="check"
+                                  label="Confirmar" no-caps dense @click="confirmActivity(act)" />
+
+                                <q-badge v-else color="green-9" class="confirmed-badge">
+                                  <q-icon name="check_circle" size="16px" class="q-mr-xs" />
+                                  Revisado
+                                </q-badge>
+
                               </td>
                             </tr>
                           </template>
                         </template>
                       </template>
                     </tbody>
-                  </table>ss
+                  </table>
                 </div>
               </div>
             </q-card-section>
@@ -260,6 +333,40 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="showReadMore">
+
+      <q-card class="read-more-dialog">
+
+        <!-- TÍTULO -->
+        <q-card-section class="bg-green-9 text-white">
+          <div class="text-h6 text-weight-bold">
+            {{ readMoreTitle }}
+          </div>
+        </q-card-section>
+
+        <!-- INFORMACIÓN -->
+        <q-card-section class="read-more-content">
+
+          <ul class="read-more-list">
+
+            <li v-for="(item, index) in readMoreItems" :key="index">
+              {{ item }}
+            </li>
+
+          </ul>
+
+        </q-card-section>
+
+        <!-- BOTÓN CERRAR -->
+        <q-card-actions align="right">
+
+          <q-btn flat label="CERRAR" color="green-9" @click="showReadMore = false" />
+
+        </q-card-actions>
+
+      </q-card>
+
+    </q-dialog>
   </q-layout>
 </template>
 
@@ -284,6 +391,30 @@ const notifications = ref([]);
 const showEditor = ref(false);
 const editorTarget = ref(null);
 
+const showReadMore = ref(false);
+const readMoreTitle = ref('');
+const readMoreItems = ref([]);
+
+const openReadMore = (text, title) => {
+  readMoreTitle.value = title;
+
+  if (!text) {
+    readMoreItems.value = ['Sin información'];
+    showReadMore.value = true;
+    return;
+  }
+
+  // Convertimos el contenido en una lista
+  const items = String(text)
+    .split('•')
+    .map(item => item.trim())
+    .filter(item => item.length > 0);
+
+  readMoreItems.value = items.length ? items : [String(text)];
+
+  showReadMore.value = true;
+};
+
 const extraColumns = [
   { key: 'projectActivity', label: 'ACTIVIDAD DE PROYECTO FORMATIVO' },
   { key: 'concepts', label: 'SABERES DE CONCEPTOS Y PRINCIPIOS' },
@@ -298,6 +429,20 @@ const extraColumns = [
   { key: 'responsible', label: 'INSTRUCTOR RESPONSABLE' },
   { key: 'observations', label: 'OBSERVACIONES' }
 ];
+
+const isActivityConfirmed = (act) => {
+  return act.reviewed === true;
+};
+
+const confirmActivity = (act) => {
+  act.reviewed = true;
+
+  $q.notify({
+    message: 'Actividad confirmada como revisada.',
+    color: 'green-9',
+    icon: 'check_circle'
+  });
+};
 
 const editor = reactive({
   description: '', directHours: 0, independentHours: 0, concepts: '', processes: '', criteria: '',
@@ -457,7 +602,7 @@ onMounted(async () => {
 }
 
 .table-wrapper {
-  width: max-content;
+  width: 100%;
   min-width: 100%;
 }
 
@@ -557,19 +702,19 @@ onMounted(async () => {
 
 /* COLUMNAS VERDES */
 .extra-header {
-  background: #2e7d32;
-  color: white;
+  background: #f5f5f5;
+  color: #333;
   width: 260px;
   min-width: 260px;
   max-width: 260px;
 }
 
 .extra-cell {
-  background: #f1f8e9;
+  background: #fff;
   width: 260px;
   min-width: 260px;
   max-width: 260px;
-  color: #30452f;
+  color: #333;
 }
 
 /* ACCIONES */
@@ -580,8 +725,98 @@ onMounted(async () => {
   text-align: center;
 }
 
-.q-footer {
-  width: max-content;
-  min-width: 100%;
+
+.text-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.read-more-btn {
+  padding: 0;
+  margin-top: 5px;
+  min-height: 22px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.read-more-dialog {
+  width: 700px;
+  max-width: 90vw;
+}
+
+.read-more-content {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.confirm-header {
+  background: #f5f5f5;
+  color: #333;
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  text-align: center;
+}
+
+.confirm-cell {
+  background: #fff;
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  text-align: center;
+  vertical-align: middle !important;
+}
+
+.confirmed-badge {
+  padding: 7px 10px;
+  font-weight: 700;
+}
+
+.read-more-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.read-more-list {
+  margin: 0;
+  padding-left: 25px;
+}
+
+.read-more-list li {
+  margin-bottom: 12px;
+  line-height: 1.6;
+  font-size: 15px;
+  color: #333;
+}
+
+.read-more-dialog {
+  width: 700px;
+  max-width: 90vw;
+}
+
+.read-more-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.read-more-list {
+  margin: 0;
+  padding-left: 25px;
+}
+
+.read-more-list li {
+  margin-bottom: 12px;
+  line-height: 1.6;
+  font-size: 15px;
+  color: #333;
 }
 </style>

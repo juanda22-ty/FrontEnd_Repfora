@@ -9,11 +9,13 @@ const EmailTemplateSchema = new Schema({
 
 const AppSettingsSchema = new Schema({
   emailEnabled: { type: Boolean, default: true },
+  cronEnabled: { type: Boolean, default: true },
   emailTemplate: { type: EmailTemplateSchema, default: () => ({}) },
-  lastJudgmentAuditDate: { type: Date, default: null }
+  lastJudgmentAuditDate: { type: Date, default: null },
+  catalogLastUploadDate: { type: Date, default: null }
 }, {
   timestamps: true,
-  collection: 'appsettings'
+  collection: 'appsettings'  
 });
 
 // Solo debe existir un registro

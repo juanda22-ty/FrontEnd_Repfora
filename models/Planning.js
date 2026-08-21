@@ -13,7 +13,6 @@ const activitySchema = new mongoose.Schema({
     materials: [String]
   },
   observations: { type: String },
-  isScheduledInCalendar: { type: Boolean, default: false },
   suggestedInstructor: {
     id: { type: String },
     name: { type: String },
@@ -26,25 +25,15 @@ const activitySchema = new mongoose.Schema({
   },
   scheduleDetails: {
     assignedDays: [String],
-    shift: {
-      type: String,
-      enum: ['morning', 'afternoon', 'night', 'diurna', 'nocturna', 'mixta_manana', 'mixta_manana_tarde', 'personalizado', '', null]
-    },
-    tstart: { type: String },
-    tend: { type: String },
-    startDate: { type: String },
-    selectedDays: [Number],
-    vacation: { type: mongoose.Schema.Types.Mixed },
+    shift: { type: String, enum: ['morning', 'afternoon', 'night', '', null] },
     hoursPerDay: { type: Number },
-    calendarNotes: { type: String },
-    isPublished: { type: Boolean, default: false }
-  } 
+    calendarNotes: { type: String }
+  }
 }, { _id: false });
 
 const rapSchema = new mongoose.Schema({
   description: { type: String, required: true },
   evaluationCriteria: [String],
-  projectActivity: { type: String },
   pedagogicalActivities: [activitySchema]
 }, { _id: false });
 
@@ -56,8 +45,7 @@ const competenceSchema = new mongoose.Schema({
     conceptsAndPrinciples: [String],
     processes: [String]
   },
-  evaluationCriteria: [String],
-  academicRequirements:{ type: String, default: ""},
+  evaluationCriteria: [String], // CAMPO AÑADIDO PARA EL POOL GLOBAL
   learningOutcomes: [rapSchema]
 }, { _id: false });
 
@@ -83,8 +71,7 @@ const planningSchema = new mongoose.Schema({
       productivaHours: { type: Number },
       lectivaStartDate: { type: Date },
       lectivaEndDate: { type: Date },
-      teamPdfProcessed: { type: Boolean, default: false },
-      projectCode: { type: String }
+      teamPdfProcessed: { type: Boolean, default: false }
     },
     fiche: { type: String, required: true },
     leaderEmail: { type: String },
@@ -106,9 +93,6 @@ const planningSchema = new mongoose.Schema({
 planningSchema.pre('save', async function () {
   this.pedagogicalPlanning.timestamps.updatedAt = new Date();
 });
-
-// Índice único para búsquedas rápidas por número de ficha
-planningSchema.index({ 'pedagogicalPlanning.fiche': 1 }, { unique: true });
 
 const Planning = mongoose.model('Planning', planningSchema, 'pedagogicalPlanning');
 

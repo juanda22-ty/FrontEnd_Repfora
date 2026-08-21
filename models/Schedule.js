@@ -17,7 +17,6 @@
  * @property {Array} events - The events associated with the schedule.
  * @property {number} status - The status of the schedule.
  * @property {number} hourswork - The number of hours worked for the schedule.
- * @property {string} scheduleType - Tipo de horario: TITULADA o COMPLEMENTARIA.
  * @property {Date} createdAt - The date the schedule was created.
  * @property {Date} updatedAt - The date the schedule was last updated.
  */
@@ -28,6 +27,7 @@ const SchedulesSquema = new Schema(
     fiche: {
       type: Schema.Types.ObjectId,
       ref: "Fiche",
+      required: true,
     },
     program: {
       type: Schema.Types.ObjectId,
@@ -35,12 +35,16 @@ const SchedulesSquema = new Schema(
       required: true,
     },
     competence: {
+      //competencia
       type: Schema.Types.ObjectId,
       ref: "Competence",
+      required: true,
     },
     outcome: {
+      //resultados
       type: Schema.Types.ObjectId,
       ref: "Outcomes",
+      required: true,
     },
     instructor: {
       type: Schema.Types.ObjectId,
@@ -58,12 +62,7 @@ const SchedulesSquema = new Schema(
     environment: {
       type: Schema.Types.ObjectId,
       ref: "Environment",
-      // En TITULADA el ambiente es obligatorio (además se exige en schedule.validation).
-      // En COMPLEMENTARIA es opcional: cursos tipo CAMPSENA/AULA MÓVIL/virtuales pueden
-      // no tener un ambiente físico fijo (ver scheduleComplementary en complementary.controller).
-      required: function () {
-        return this.scheduleType !== "COMPLEMENTARIA";
-      },
+      required: true,
     },
     days: {
       // [0,1,2,3,4,5,6] || ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
@@ -99,16 +98,6 @@ const SchedulesSquema = new Schema(
     hourswork: {
       type: Number,
       default: 0,
-    },
-    scheduleType: {
-      type: String,
-      enum: ["TITULADA", "COMPLEMENTARIA"],
-      default: "TITULADA",
-    },
-    complementaryRequest: {
-      type: Schema.Types.ObjectId,
-      ref: "ComplementaryRequest",
-      default: null,
     },
     rated:{ type: Boolean, default: false },
     qualifiable:{ type: Boolean, default: true },

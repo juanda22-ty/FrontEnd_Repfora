@@ -5,6 +5,7 @@
  * @property {string} modality - The modality of the coordination.
  * @property {string} email - The email of the coordination.
  * @property {string} emailsupervisor - The email of the supervisor.
+ * @property {string} emailcoordinator - The email of the coordinator.
  * @property {string} passapp - The password of the coordination.
  * @property {number} status - The status of the coordination.
  * @property {Date} createdAt - The date when the coordination was created.
@@ -52,11 +53,14 @@ const CoordinationSquema = new Schema(
     },
     emailsupervisor: {
       type: String,
-    }
+    },
+    emailcoordinator: {
+      type: String,
+    },
   },
   {
     timestamps: true,
   }
-);  
+);
 
 export default model("Coordination", CoordinationSquema);

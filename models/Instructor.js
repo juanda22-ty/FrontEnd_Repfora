@@ -73,14 +73,6 @@ const InstructorSquema = new Schema(
       type: Number,
       default: 0,
     },
-    accessCode: {
-      type: String,
-      default: null,
-    },
-    accessCodeCreatedAt: {
-      type: Date,
-      default: null,
-    },
   }, 
   {
     timestamps: true,

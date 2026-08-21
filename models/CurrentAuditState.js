@@ -16,64 +16,43 @@ const OutcomeStateSchema = new Schema({
   outcomeText: String,
   fend: Date,
 
+  // Para pendientes
   missingLearners: [LearnerInfoSchema],
   totalLearners: Number,
   isTotalMissing: Boolean,
 
+  // Para vencidos
   daysOverdue: Number,
   missingCount: Number,
 
+  // Instructor del schedule
   instructorName: String,
   instructorEmail: String,
 
+  // Líder de la ficha (fiche.owner)
   ficheOwnerName: String,
   ficheOwnerEmail: String,
 
+  // Estado
   isVencido: { type: Boolean, default: false }
 }, { _id: false });
 
-// Resumen de auditoría por ficha
-const FicheSummarySchema = new Schema({
-  ficheNumber: String,
-  ficheId: { type: Schema.Types.ObjectId, ref: 'Fiche' },
-  programName: String,
-  coordinationId: { type: Schema.Types.ObjectId, ref: 'Coordination' },
-  coordinationName: String,
-
-  aprendicesActivos: { type: Number, default: 0 },
-  rapsTotal: { type: Number, default: 0 },
-  alDia: { type: Number, default: 0 },
-  aunNoVence: { type: Number, default: 0 },
-  sncParcial: { type: Number, default: 0 },
-  sncCritico: { type: Number, default: 0 },
-  sinProgramar: { type: Number, default: 0 },
-  rapsConExclusiones: { type: Number, default: 0 },
-
-  estadoGeneral: { type: String, enum: ['AL DÍA', 'SNC PARCIAL', 'SNC CRÍTICO'], default: 'AL DÍA' }
-}, { _id: false });
-
-// Una ejecución del cron
-const AuditRunSchema = new Schema({
-  executionDate: { type: Date, default: Date.now },
-  fichesSummary: [FicheSummarySchema],
+// Estado actual de auditoría (registro único)
+const CurrentAuditStateSchema = new Schema({
   pendientes: [OutcomeStateSchema],
   vencidos: [OutcomeStateSchema],
+  ultimaActualizacion: { type: Date, default: Date.now },
   estadisticas: {
     totalPendientes: { type: Number, default: 0 },
     totalVencidos: { type: Number, default: 0 },
     totalAprendicesSinNota: { type: Number, default: 0 }
   }
-}, { _id: false });
-
-// Estado de auditoría — guarda las últimas 2 ejecuciones
-const CurrentAuditStateSchema = new Schema({
-  runs: { type: [AuditRunSchema], default: [] },
-  ultimaActualizacion: { type: Date, default: Date.now }
 }, {
   timestamps: true,
   collection: 'currentauditstate'
 });
 
+// Índice único - solo debe existir un registro
 CurrentAuditStateSchema.index({}, { unique: true });
 
 export default mongoose.models.CurrentAuditState || mongoose.model('CurrentAuditState', CurrentAuditStateSchema);

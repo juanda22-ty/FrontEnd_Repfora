@@ -34,6 +34,8 @@ import { routerAuditLog} from "./routes/dailyAuditLogs.js"
 import routerAuditoria from "./routes/auditoria.routes.js"
 import { initCron } from "./services/cronService.js"
 import { initEmailSettings } from "./services/notificationService.js"
+import { routerPlanning } from "./routes/planning.routes.js";
+import { routerNotifications } from "./routes/notifications.routes.js";
 
 dotenv.config();
 
@@ -453,6 +455,8 @@ class Server {
     this.app.use("/api/learneromission",routerOmit);
     this.app.use("/api/auditlog",routerAuditLog);
     this.app.use("/api/auditoria", routerAuditoria);
+    this.app.use("/api/planning", routerPlanning);
+    this.app.use("/api/notifications", routerNotifications);
     this.app.use("/life", (req, res) => {
       res.send("life server");
     });

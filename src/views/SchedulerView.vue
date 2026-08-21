@@ -320,78 +320,88 @@
                               <!-- ESTADO -->
                               <td class="text-center">
                                 <q-chip 
-                                  :color="getStatusColor(act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus)" 
+                                  :color="getStatusColor(getActivityStatus(act))" 
                                   text-color="white" 
                                   dense 
                                   square
                                   class="text-weight-bold text-caption text-uppercase"
                                   style="font-size: 11px; padding: 4px 8px;"
                                 >
-                                  <q-icon :name="getStatusIcon(act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus)" class="q-mr-xs" />
-                                  {{ getStatusLabel(act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) }}
+                                  <q-icon :name="getStatusIcon(getActivityStatus(act))" class="q-mr-xs" />
+                                  {{ getStatusLabel(getActivityStatus(act)) }}
                                 </q-chip>
                               </td>
 
                               <!-- ACCIONES -->
                               <td class="text-center">
-                                <div class="row justify-center q-gutter-xs">
-                                  <!-- Confirm button -->
-                                  <q-btn 
-                                    flat 
-                                    round 
-                                    dense 
-                                    color="green-9" 
-                                    icon="check" 
-                                    size="sm" 
-                                    :disabled="(act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) === 'confirmed' || !(act.suggestedInstructor?.name || act.instructors?.name)"
-                                    @click="confirmInstructor(phase, comp, rap, act)"
-                                  >
-                                    <q-tooltip class="bg-green-9">Confirmar Instructor</q-tooltip>
-                                  </q-btn>
+                                <q-btn flat round dense color="green-9" icon="settings" size="sm">
+                                  <q-tooltip class="bg-grey-9">Opciones</q-tooltip>
+                                  <q-menu anchor="bottom right" self="top right" auto-close square class="opciones-menu">
+                                    <div class="bg-green-10 text-white q-px-md q-py-sm row items-center q-gutter-x-sm">
+                                      <q-icon name="settings" size="18px" />
+                                      <span class="text-subtitle2 text-weight-bolder text-uppercase">Opciones de la Actividad</span>
+                                    </div>
+                                    <q-list dense style="min-width: 300px;" class="text-grey-9 q-pa-xs">
+                                      <!-- Confirm button -->
+                                      <q-item clickable v-close-popup
+                                        :disable="(act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) === 'confirmed' || !(act.suggestedInstructor?.name || act.instructors?.name)"
+                                        @click="confirmInstructor(phase, comp, rap, act)">
+                                        <q-item-section avatar><q-icon name="check" color="green-9" /></q-item-section>
+                                        <q-item-section>
+                                          <q-item-label class="text-weight-medium">Confirmar Instructor</q-item-label>
+                                          <q-item-label caption v-if="(act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) === 'confirmed'">Ya está confirmado</q-item-label>
+                                        </q-item-section>
+                                      </q-item>
+                                      <q-separator spaced="4px" />
 
-                                  <!-- Programar en Calendario Button -->
-                                  <q-btn 
-                                    flat 
-                                    round 
-                                    dense 
-                                    color="teal-9" 
-                                    icon="calendar_month" 
-                                    size="sm"
-                                    :disabled="!act.scheduleDetails?.assignedDays?.length || (act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) !== 'confirmed'"
-                                    @click="scheduleOutcomeToCalendar(phase, comp, rap, act, phIdx, coIdx, rapIdx, acIdx)"
-                                  >
-                                    <q-tooltip class="bg-teal-9">
-                                      {{ act.scheduleDetails?.assignedDays?.length ? ((act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) === 'confirmed' ? 'Programar este Resultado en el Calendario de Horarios' : 'Se habilitará cuando el instructor esté CONFIRMADO') : 'Sin programar (el instructor no ha asignado fechas)' }}
-                                    </q-tooltip>
-                                  </q-btn>
+                                      <!-- Programar en Calendario Button -->
+                                      <q-item clickable v-close-popup
+                                        :disable="act.scheduleDetails?.isPublished || !act.scheduleDetails?.assignedDays?.length || (act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) !== 'confirmed'"
+                                        @click="scheduleOutcomeToCalendar(phase, comp, rap, act, phIdx, coIdx, rapIdx, acIdx)">
+                                        <q-item-section avatar><q-icon name="calendar_month" color="teal-9" /></q-item-section>
+                                        <q-item-section>
+                                          <q-item-label class="text-weight-medium">Programar en Calendario</q-item-label>
+                                          <q-item-label caption>
+                                            {{ act.scheduleDetails?.isPublished ? 'Ya programado en el Calendario de Horarios' : (act.scheduleDetails?.assignedDays?.length ? ((act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) === 'confirmed' ? 'Registrar en el Calendario de Horarios' : 'Se habilita con instructor CONFIRMADO') : 'Sin fechas asignadas por el instructor') }}
+                                          </q-item-label>
+                                        </q-item-section>
+                                      </q-item>
+                                      <q-separator spaced="4px" />
 
-                                  <!-- Change/Reassign button -->
-                                  <q-btn 
-                                    flat 
-                                    round 
-                                    dense 
-                                    color="blue-8" 
-                                    icon="person_add" 
-                                    size="sm" 
-                                    @click="openReassignModal(phase, comp, rap, act)"
-                                  >
-                                    <q-tooltip class="bg-blue-8">Reasignar/Cambiar Instructor</q-tooltip>
-                                  </q-btn>
+                                      <!-- Editar Días Asignados Button -->
+                                      <q-item clickable v-close-popup
+                                        :disable="act.scheduleDetails?.isPublished"
+                                        @click="openEditDaysModal(phase, comp, rap, act)">
+                                        <q-item-section avatar><q-icon name="edit_calendar" color="purple-9" /></q-item-section>
+                                        <q-item-section>
+                                          <q-item-label class="text-weight-medium">Editar Días Asignados</q-item-label>
+                                          <q-item-label caption v-if="act.scheduleDetails?.isPublished">Ya programado (no editable)</q-item-label>
+                                        </q-item-section>
+                                      </q-item>
+                                      <q-separator spaced="4px" />
 
-                                  <!-- Reject button -->
-                                  <q-btn 
-                                    flat 
-                                    round 
-                                    dense 
-                                    color="red-8" 
-                                    icon="close" 
-                                    size="sm"
-                                    :disabled="(act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) === 'rejected' || !(act.suggestedInstructor?.name || act.instructors?.name)"
-                                    @click="rejectInstructor(phase, comp, rap, act)"
-                                  >
-                                    <q-tooltip class="bg-red-8">Rechazar Instructor</q-tooltip>
-                                  </q-btn>
-                                </div>
+                                      <!-- Change/Reassign button -->
+                                      <q-item clickable v-close-popup @click="openReassignModal(phase, comp, rap, act)">
+                                        <q-item-section avatar><q-icon name="person_add" color="blue-8" /></q-item-section>
+                                        <q-item-section>
+                                          <q-item-label class="text-weight-medium">Reasignar/Cambiar Instructor</q-item-label>
+                                        </q-item-section>
+                                      </q-item>
+                                      <q-separator spaced="4px" />
+
+                                      <!-- Reject button -->
+                                      <q-item clickable v-close-popup
+                                        :disable="(act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) === 'rejected' || !(act.suggestedInstructor?.name || act.instructors?.name)"
+                                        @click="rejectInstructor(phase, comp, rap, act)">
+                                        <q-item-section avatar><q-icon name="close" color="red-8" /></q-item-section>
+                                        <q-item-section>
+                                          <q-item-label class="text-weight-medium">Rechazar Instructor</q-item-label>
+                                          <q-item-label caption v-if="(act.suggestedInstructor?.assignmentStatus || act.instructors?.assignmentStatus) === 'rejected'">Ya está rechazado</q-item-label>
+                                        </q-item-section>
+                                      </q-item>
+                                    </q-list>
+                                  </q-menu>
+                                </q-btn>
                               </td>
 
                             </tr>
@@ -413,9 +423,9 @@
     <!-- REASSIGN INSTRUCTOR DIALOG -->
     <q-dialog v-model="showReassignModal" persistent>
       <q-card style="width: 500px; max-width: 90vw; border-radius: 12px;">
-        <q-card-section class="bg-blue-9 text-white q-py-md">
+        <q-card-section class="bg-green-10 text-white q-py-md">
           <div class="text-h6 text-weight-bolder">REASIGNAR INSTRUCTOR</div>
-          <div class="text-caption text-blue-2">Elija un instructor calificado para este resultado y verifique disponibilidad.</div>
+          <div class="text-caption text-green-2">Elija un instructor calificado para este resultado y verifique disponibilidad.</div>
         </q-card-section>
 
         <q-card-section class="q-pa-md">
@@ -448,7 +458,7 @@
 
           <!-- Conflict Checker State -->
           <div v-if="checkingConflicts" class="text-center q-pa-md">
-            <q-spinner-dots color="blue-8" size="30px" />
+            <q-spinner-dots color="green-10" size="30px" />
             <div class="text-caption text-grey-7 q-mt-xs">Verificando cruces de horario en la base de datos...</div>
           </div>
 
@@ -479,7 +489,7 @@
         <q-card-actions align="right" class="q-pa-md border-top">
           <q-btn flat label="Cancelar" color="grey-8" v-close-popup />
           <q-btn 
-            class="bg-blue-9 text-white text-weight-bolder" 
+            class="bg-green-10 text-white text-weight-bolder" 
             label="Confirmar Asignación" 
             :disabled="!reassignInstructor"
             @click="applyReassignment" 
@@ -487,60 +497,210 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <!-- ── Modal: Distribución de Horas por Trimestre ── -->
-    <q-dialog v-model="showTrimestreModal" persistent>
-      <q-card style="min-width: 550px; max-width: 700px; border-radius: 12px;" square>
-        <!-- Header -->
-        <q-card-section class="bg-green-9 text-white row items-center q-py-md">
-          <q-icon name="calendar_month" size="28px" class="q-mr-sm" />
-          <div>
-            <div class="text-h6 text-weight-bolder">DISTRIBUCIÓN DE HORAS POR TRIMESTRE</div>
-            <div class="text-caption">Ficha {{ selectedPlanning?.pedagogicalPlanning?.fiche }}</div>
+    <!-- ── Modal: Editar Días Asignados ── -->
+    <q-dialog v-model="showEditDaysModal" persistent>
+      <q-card style="width: 680px; max-width: 94vw; border-radius: 12px;">
+        <q-card-section class="bg-green-10 text-white q-py-md">
+          <div class="text-h6 text-weight-bolder">EDITAR DÍAS ASIGNADOS</div>
+          <div class="text-caption text-green-2">Ajuste las fechas de las sesiones por motivos logísticos (ej. cambio de instructor).</div>
+        </q-card-section>
+
+        <q-card-section class="q-pa-md">
+          <div class="q-pa-md bg-grey-2 rounded-borders text-caption q-mb-md">
+            <strong>RAP:</strong> {{ editDaysContext?.rap?.description }} <br />
+            <strong>Actividad:</strong> {{ editDaysContext?.act?.description || editDaysContext?.act?.observations || 'Sin descripción' }} <br />
+            <strong>Instructor:</strong> {{ editDaysContext?.act?.suggestedInstructor?.name || editDaysContext?.act?.instructors?.name || 'Sin asignar' }}
+          </div>
+
+          <div class="full-width">
+            <q-date
+              v-model="editDaysSelected"
+              multiple
+              today-btn
+              color="green-10"
+              class="edit-days-calendar"
+              :min="editDaysMinDate"
+              :max="editDaysMaxDate"
+            />
+          </div>
+
+          <div class="q-mt-md row items-center justify-between">
+            <q-badge color="green-10" class="text-weight-bold" style="font-size: 12px; padding: 4px 10px;">
+              {{ editDaysSelected.length }} día(s) seleccionado(s)
+            </q-badge>
+            <q-btn flat dense color="grey-7" label="Limpiar" icon="delete_sweep" @click="editDaysSelected = []" />
+          </div>
+
+          <div v-if="editDaysSelected.length > 0" class="text-caption text-black q-mt-sm bg-grey-1 q-pa-sm rounded-borders" style="line-height: 1.8;">
+            {{ [...editDaysSelected].sort().join(' — ') }}
           </div>
         </q-card-section>
 
-        <q-card-section class="q-pa-lg">
-          <div class="text-body2 text-grey-7 q-mb-md">
-            A continuación se muestra la distribución de horas directas programadas en el calendario por cada trimestre de la formación. Verifique que la distribución sea correcta antes de confirmar.
+        <q-card-actions align="right" class="q-pa-md border-top">
+          <q-btn flat label="Cancelar" color="grey-8" v-close-popup />
+          <q-btn 
+            class="bg-green-10 text-white text-weight-bolder" 
+            label="Guardar Días" 
+            icon="save"
+            @click="saveEditedDays" 
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <!-- ── Modal: Programar Resultado en el Calendario Oficial ── -->
+    <q-dialog v-model="showScheduleOutcomeModal" persistent>
+      <q-card flat bordered style="width: 640px; max-width: 94vw; border-radius: 10px;">
+        <!-- Header -->
+        <q-card-section class="bg-green-10 text-white row items-center q-py-md border-bottom">
+          <div>
+            <div class="text-subtitle2 text-weight-bolder text-uppercase">Calendario Oficial de Horarios</div>
+            <div class="text-h5 text-weight-bolder">PROGRAMAR RESULTADO EN CALENDARIO</div>
+            <div class="text-caption text-green-2 q-mt-xs">
+              <strong>Ficha:</strong> {{ selectedPlanning?.pedagogicalPlanning?.fiche }} |
+              <strong>Programa:</strong> {{ selectedPlanning?.pedagogicalPlanning?.metadata?.programName }}
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-section class="q-pa-md">
+          <!-- Info -->
+          <div class="bg-green-1 q-pa-md q-mb-md row items-start q-gutter-x-sm" style="border: 1px solid #c8e6c9;">
+            <q-icon name="info" color="green-9" size="20px" />
+            <div class="text-caption text-green-10" style="line-height: 1.5;">
+              Se registrará este Resultado de Aprendizaje en el Calendario oficial de Horarios de la ficha.
+              Tenga en cuenta que esta acción es definitiva.
+            </div>
+          </div>
+
+          <!-- Detalles de la actividad -->
+          <div class="bg-grey-1 q-pa-md border-all" style="line-height: 1.9;">
+            <div class="row text-caption">
+              <div class="col-3 text-grey-6 text-weight-bolder text-uppercase">Fase</div>
+              <div class="col-9 text-grey-9">{{ getPhaseLabel(scheduleOutcomeContext?.phase?.phase) }}</div>
+            </div>
+            <div class="row text-caption">
+              <div class="col-3 text-grey-6 text-weight-bolder text-uppercase">Competencia</div>
+              <div class="col-9 text-grey-9">{{ scheduleOutcomeContext?.comp?.code }} — {{ scheduleOutcomeContext?.comp?.name }}</div>
+            </div>
+            <div class="row text-caption">
+              <div class="col-3 text-grey-6 text-weight-bolder text-uppercase">RAP</div>
+              <div class="col-9 text-grey-9 text-weight-medium">{{ scheduleOutcomeContext?.rap?.description }}</div>
+            </div>
+            <div class="row text-caption">
+              <div class="col-3 text-grey-6 text-weight-bolder text-uppercase">Actividad</div>
+              <div class="col-9 text-grey-9">{{ scheduleOutcomeContext?.act?.description || scheduleOutcomeContext?.act?.observations || 'Sin descripción' }}</div>
+            </div>
+            <div class="row text-caption">
+              <div class="col-3 text-grey-6 text-weight-bolder text-uppercase">Instructor</div>
+              <div class="col-9 text-grey-9 text-weight-medium">
+                {{ scheduleOutcomeContext?.act?.suggestedInstructor?.name || scheduleOutcomeContext?.act?.instructors?.name || 'Sin asignar' }}
+              </div>
+            </div>
+            <div class="row text-caption">
+              <div class="col-3 text-grey-6 text-weight-bolder text-uppercase">Sesiones</div>
+              <div class="col-9 text-grey-9">
+                <q-badge square color="green-9" text-color="white" class="text-weight-bolder q-mr-sm" style="font-size: 11px; padding: 3px 8px;">
+                  {{ scheduleOutcomeContext?.act?.scheduleDetails?.assignedDays?.length || 0 }} sesión(es)
+                </q-badge>
+                <span class="text-caption text-grey-7">{{ formatDaysList(scheduleOutcomeContext?.act?.scheduleDetails?.assignedDays || []) }}</span>
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1 border-top">
+          <q-btn flat label="Cancelar" color="grey-7" v-close-popup class="text-weight-medium" :disable="scheduleOutcomeLoading" />
+          <q-btn
+            class="bg-green-9 text-white text-weight-bolder q-px-lg"
+            :label="scheduleOutcomeLoading ? 'Programando...' : 'Sí, Programar'"
+            icon="calendar_month"
+            unelevated
+            :disable="scheduleOutcomeLoading"
+            @click="confirmScheduleOutcome"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- ── Modal: Distribución de Horas por Trimestre ── -->
+    <q-dialog v-model="showTrimestreModal" persistent>
+      <q-card square flat bordered style="width: 680px; max-width: 94vw; border-radius: 0;">
+        <!-- Header -->
+        <q-card-section class="bg-green-10 text-white row items-center q-py-md border-bottom">
+          <q-avatar square color="white" text-color="green-10" icon="calendar_month" size="44px" class="q-mr-md" />
+          <div>
+            <div class="text-subtitle2 text-weight-bolder text-uppercase">Programación Final de la Ficha</div>
+            <div class="text-h5 text-weight-bolder">DISTRIBUCIÓN DE HORAS POR TRIMESTRE</div>
+            <div class="text-caption text-green-2 q-mt-xs">
+              <strong>Ficha:</strong> {{ selectedPlanning?.pedagogicalPlanning?.fiche }} |
+              <strong>Programa:</strong> {{ selectedPlanning?.pedagogicalPlanning?.metadata?.programName }}
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-section class="q-pa-md">
+          <!-- Info -->
+          <div class="bg-green-1 q-pa-md q-mb-md row items-start q-gutter-x-sm" style="border: 1px solid #c8e6c9;">
+            <q-icon name="info" color="green-9" size="20px" />
+            <div class="text-caption text-green-10" style="line-height: 1.5;">
+              Distribución de horas directas programadas en el calendario por cada trimestre de la formación.
+              Verifique que la distribución sea la correcta antes de confirmar y publicar la ficha.
+            </div>
           </div>
 
           <!-- Tabla de trimestres -->
-          <q-markup-table flat bordered dense class="q-mb-md">
-            <thead class="bg-green-1">
+          <table class="scheduler-table trimestre-table">
+            <thead>
               <tr>
-                <th class="text-left text-green-10 text-weight-bolder">TRIMESTRE</th>
-                <th class="text-left text-green-10 text-weight-bolder">PERÍODO</th>
-                <th class="text-center text-green-10 text-weight-bolder">HORAS PROGRAMADAS</th>
+                <th style="width: 130px;">TRIMESTRE</th>
+                <th>PERÍODO</th>
+                <th style="width: 220px;">HORAS PROGRAMADAS</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="t in horasPorTrimestre" :key="t.trimestre">
-                <td class="text-weight-bold">Trimestre {{ t.trimestre }}</td>
-                <td class="text-grey-7 text-caption">{{ t.inicio }} → {{ t.fin }}</td>
-                <td class="text-center">
-                  <q-badge color="green-8" class="text-weight-bold" style="font-size: 13px; padding: 4px 10px;">
-                    {{ t.horas }}h
+                <td>
+                  <q-badge square color="green-9" text-color="white" class="text-weight-bolder" style="font-size: 12px; padding: 4px 10px;">
+                    TRIMESTRE {{ t.trimestre }}
                   </q-badge>
+                </td>
+                <td class="text-caption text-grey-8">
+                  <span class="text-weight-medium">{{ t.inicio }}</span>
+                  <span class="q-mx-sm text-grey-5">→</span>
+                  <span class="text-weight-medium">{{ t.fin }}</span>
+                </td>
+                <td>
+                  <div class="row items-center q-gutter-x-sm">
+                    <q-linear-progress :value="maxTrimestreHoras > 0 ? t.horas / maxTrimestreHoras : 0" color="green-9" track-color="green-2" class="col" style="height: 8px;" />
+                    <q-badge square color="green-8" text-color="white" class="text-weight-bolder" style="font-size: 12px; padding: 4px 10px; min-width: 52px;">
+                      {{ t.horas }}h
+                    </q-badge>
+                  </div>
                 </td>
               </tr>
               <!-- Fila total -->
-              <tr class="bg-grey-2">
-                <td class="text-weight-bolder text-green-10">TOTAL</td>
+              <tr class="total-row">
+                <td class="text-weight-bolder text-green-10 text-uppercase">Total</td>
                 <td></td>
-                <td class="text-center">
-                  <q-badge color="green-10" class="text-weight-bolder" style="font-size: 14px; padding: 5px 12px;">
-                    {{ totalHorasPlaneadas }}h
-                  </q-badge>
+                <td>
+                  <div class="row items-center justify-end q-gutter-x-sm">
+                    <q-icon name="check_circle" color="green-9" size="20px" />
+                    <q-badge square color="green-10" text-color="white" class="text-weight-bolder" style="font-size: 14px; padding: 6px 14px;">
+                      {{ totalHorasPlaneadas }}h
+                    </q-badge>
+                  </div>
                 </td>
               </tr>
             </tbody>
-          </q-markup-table>
+          </table>
 
           <!-- Advertencia si hay distribución muy desigual -->
           <q-banner
             v-if="horasPorTrimestre.length > 1 && Math.max(...horasPorTrimestre.map(t => t.horas)) > Math.min(...horasPorTrimestre.map(t => t.horas)) * 2"
-            class="bg-orange-1 text-orange-9 q-mb-sm rounded-borders"
+            class="bg-orange-1 text-orange-9 q-mt-md"
             dense
+            square
+            style="border: 1px solid #ffe082;"
           >
             <template v-slot:avatar>
               <q-icon name="warning" color="orange-8" />
@@ -549,12 +709,13 @@
           </q-banner>
         </q-card-section>
 
-        <q-card-actions align="right" class="q-pa-md bg-grey-1">
-          <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+        <q-card-actions align="right" class="q-pa-md bg-grey-1 border-top">
+          <q-btn flat label="Cancelar" color="grey-7" v-close-popup class="text-weight-medium" />
           <q-btn
             class="bg-green-9 text-white text-weight-bolder q-px-lg"
             label="Confirmar y Guardar Programación"
             icon="check_circle"
+            unelevated
             @click="confirmarProgramacionFinal"
           />
         </q-card-actions>
@@ -617,6 +778,21 @@ const checkingConflicts = ref(false);
 const conflictResult = ref(null);
 const filteredInstructors = ref([]);
 
+// ── Edición de Días Asignados ──
+const showEditDaysModal = ref(false);
+const editDaysContext = ref(null); // { phase, comp, rap, act }
+const editDaysSelected = ref([]);
+
+const editDaysMinDate = computed(() => {
+  const d = selectedPlanning.value?.pedagogicalPlanning?.metadata?.lectivaStartDate;
+  return d ? d.slice(0, 10) : undefined;
+});
+
+const editDaysMaxDate = computed(() => {
+  const d = selectedPlanning.value?.pedagogicalPlanning?.metadata?.lectivaEndDate;
+  return d ? d.slice(0, 10) : undefined;
+});
+
 function filterFn(val, update) {
   if (val === '') {
     update(() => {
@@ -664,6 +840,12 @@ const showTrimestreModal = ref(false);
 const horasPorTrimestre = ref([]);
 const totalHorasPlaneadas = computed(() =>
   horasPorTrimestre.value.reduce((sum, t) => sum + t.horas, 0)
+);
+
+const maxTrimestreHoras = computed(() =>
+  horasPorTrimestre.value.length > 0
+    ? Math.max(...horasPorTrimestre.value.map(t => t.horas))
+    : 0
 );
 
 // ── Cerrar Sesión ──
@@ -810,19 +992,27 @@ const formatDaysList = (days) => {
   return days.join(', ');
 };
 
+const getActivityStatus = (act) => {
+  if (act?.scheduleDetails?.isPublished) return 'programmed';
+  return (act?.suggestedInstructor || act?.instructors)?.assignmentStatus;
+};
+
 const getStatusColor = (status) => {
+  if (status === 'programmed') return 'teal-9';
   if (status === 'confirmed') return 'green-9';
   if (status === 'rejected') return 'red-8';
   return 'orange-8';
 };
 
 const getStatusIcon = (status) => {
+  if (status === 'programmed') return 'event_available';
   if (status === 'confirmed') return 'check';
   if (status === 'rejected') return 'close';
   return 'hourglass_empty';
 };
 
 const getStatusLabel = (status) => {
+  if (status === 'programmed') return 'Programado';
   if (status === 'confirmed') return 'Confirmado';
   if (status === 'rejected') return 'Rechazado';
   return 'Pendiente';
@@ -951,6 +1141,41 @@ const applyReassignment = async () => {
   }
 };
 
+// 4. Editar Días Asignados
+const openEditDaysModal = (phase, comp, rap, act) => {
+  editDaysContext.value = { phase, comp, rap, act };
+  editDaysSelected.value = [...(act.scheduleDetails?.assignedDays || [])].map(d => d.replace(/-/g, '/'));
+  showEditDaysModal.value = true;
+};
+
+const saveEditedDays = async () => {
+  if (!editDaysContext.value) return;
+
+  const { act } = editDaysContext.value;
+  const assignedDays = [...editDaysSelected.value]
+    .map(d => d.replace(/\//g, '-'))
+    .sort();
+
+  act.scheduleDetails = {
+    ...(act.scheduleDetails || {}),
+    assignedDays
+  };
+
+  try {
+    await saveActivePlanningChanges();
+    showEditDaysModal.value = false;
+    $q.notify({
+      message: assignedDays.length > 0
+        ? `Días actualizados: ${assignedDays.length} sesión(es) guardada(s) para "${act.description || act.observations || 'la actividad'}".`
+        : 'Se quitaron todas las fechas asignadas.',
+      color: 'green-9',
+      icon: 'check_circle'
+    });
+  } catch (error) {
+    $q.notify({ message: 'Error al guardar los días asignados', color: 'red-8' });
+  }
+};
+
 // ── Guardado unificado en la Base de Datos ──
 const saveActivePlanningChanges = async () => {
   if (!selectedPlanning.value) return;
@@ -976,50 +1201,80 @@ const saveActivePlanningChanges = async () => {
 };
 
 // ── Programar Resultado en el Calendario Oficial ──
-const scheduleOutcomeToCalendar = async (phase, comp, rap, act, phaseIndex, competenceIndex, rapIndex, activityIndex) => {
-  $q.dialog({
-    title: '📅 PROGRAMAR RESULTADO EN CALENDARIO',
-    message: `¿Deseas programar definitivamente el Resultado de Aprendizaje "${rap.description}" en el Calendario oficial de Horarios de la Ficha ${selectedPlanning.value.pedagogicalPlanning.fiche}?`,
-    cancel: {
-      label: 'Cancelar',
-      flat: true,
-      color: 'grey-8'
-    },
-    ok: {
-      label: 'Sí, Programar',
-      color: 'green-9',
-      flat: false
-    },
-    persistent: true
-  }).onOk(async () => {
-    $q.loading.show({ message: 'Registrando horario en el calendario oficial de Horarios SENA...' });
-    try {
-      const response = await PlanningService.scheduleOutcome({
-        planningId: selectedPlanning.value._id,
-        phaseIndex,
-        competenceIndex,
-        rapIndex,
-        activityIndex
-      });
-      
-      $q.notify({
-        message: response.message || '¡Resultado programado con éxito en el calendario oficial!',
-        color: 'green-10',
-        icon: 'stars',
-        timeout: 4000
-      });
-    } catch (error) {
-      console.error('Error scheduleOutcome:', error);
-      $q.notify({
-        message: error.response?.data?.message || 'Error al programar el resultado en el calendario',
-        color: 'red-8',
-        icon: 'warning',
-        timeout: 4000
-      });
-    } finally {
-      $q.loading.hide();
+const showScheduleOutcomeModal = ref(false);
+const scheduleOutcomeContext = ref(null);
+const scheduleOutcomeLoading = ref(false);
+
+const getPhaseLabel = (phase) => {
+  return {
+    'ANALYSIS': 'Análisis',
+    'PLANNING': 'Planeación',
+    'EXECUTION': 'Ejecución',
+    'EVALUATION': 'Evaluación',
+    'INDUCCION': 'Inducción',
+    'ETAPA_PRODUCTIVA': 'Etapa Productiva'
+  }[phase] || phase;
+};
+
+const scheduleOutcomeToCalendar = (phase, comp, rap, act, phaseIndex, competenceIndex, rapIndex, activityIndex) => {
+  scheduleOutcomeContext.value = { phase, comp, rap, act, phaseIndex, competenceIndex, rapIndex, activityIndex };
+  showScheduleOutcomeModal.value = true;
+};
+
+const confirmScheduleOutcome = async () => {
+  const ctx = scheduleOutcomeContext.value;
+  if (!ctx || scheduleOutcomeLoading.value) return;
+
+  const { act, phaseIndex, competenceIndex, rapIndex, activityIndex } = ctx;
+  scheduleOutcomeLoading.value = true;
+
+  $q.loading.show({ message: 'Registrando horario en el calendario oficial de Horarios SENA...' });
+  try {
+    const response = await PlanningService.scheduleOutcome({
+      planningId: selectedPlanning.value._id,
+      phaseIndex,
+      competenceIndex,
+      rapIndex,
+      activityIndex
+    });
+
+    if (act.scheduleDetails) {
+      act.scheduleDetails.isPublished = true;
+    } else {
+      act.scheduleDetails = { isPublished: true };
     }
-  });
+
+    const fiche = selectedPlanning.value.pedagogicalPlanning?.fiche || selectedPlanning.value.fiche;
+    try {
+      const fullPlan = await PlanningService.getPlanningByFiche(fiche);
+      if (fullPlan) {
+        selectedPlanning.value = fullPlan;
+        store.planning = fullPlan;
+      }
+    } catch (reloadError) {
+      console.error('Error al recargar planeación:', reloadError);
+    }
+
+    showScheduleOutcomeModal.value = false;
+
+    $q.notify({
+      message: response.message || '¡Resultado programado con éxito en el calendario oficial!',
+      color: 'green-10',
+      icon: 'stars',
+      timeout: 4000
+    });
+  } catch (error) {
+    console.error('Error scheduleOutcome:', error);
+    $q.notify({
+      message: error.response?.data?.message || 'Error al programar el resultado en el calendario',
+      color: 'red-8',
+      icon: 'warning',
+      timeout: 4000
+    });
+  } finally {
+    scheduleOutcomeLoading.value = false;
+    $q.loading.hide();
+  }
 };
 
 // ── Finalización: Programar Ficha ──
@@ -1128,6 +1383,20 @@ const confirmarProgramacionFinal = async () => {
   background-color: #fafafa;
 }
 
+.trimestre-table td {
+  padding: 14px 12px;
+}
+
+.trimestre-table .total-row {
+  background-color: #f1f8e9 !important;
+  border-top: 2px solid #c8e6c9;
+}
+
+.trimestre-table .total-row td {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
 .hover-grow {
   transition: transform 0.2s ease-in-out;
 }
@@ -1164,5 +1433,42 @@ const confirmarProgramacionFinal = async () => {
 
 .italic {
   font-style: italic;
+}
+
+:global(.opciones-menu) {
+  border: 1px solid #e0e0e0 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18) !important;
+}
+
+:global(.opciones-menu .q-item) {
+  border-radius: 0 !important;
+  transition: background 0.15s ease;
+}
+
+:global(.opciones-menu .q-item:hover:not(.q-item--disabled)) {
+  background: #f1f8e9 !important;
+}
+
+:global(.opciones-menu .q-item--disabled) {
+  opacity: 0.45;
+}
+
+:global(.opciones-menu .q-separator) {
+  background: #eeeeee;
+}
+
+:global(.edit-days-calendar) {
+  width: 100% !important;
+}
+
+:global(.edit-days-calendar .q-date__header),
+:global(.edit-days-calendar .q-date__content),
+:global(.edit-days-calendar .q-date__view),
+:global(.edit-days-calendar .q-date__calendar) {
+  width: 100% !important;
+}
+
+:global(.edit-days-calendar .q-date__calendar) {
+  padding: 4px 12px !important;
 }
 </style>

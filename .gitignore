@@ -6,9 +6,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-utils/uploadFiles/
-utils/ 
-*.json
 .env
 .env.*
 node_modules

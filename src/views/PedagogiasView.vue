@@ -119,7 +119,7 @@
                       <tr>
                         <th class="base-col">FASE</th>
                         <th class="base-col competencia-col">COMPETENCIA</th>
-                        <th class="base-col activity-col">RESULTADO (RAP) Y ACTIVIDAD</th>
+                        <th class="base-col activity-col">RESULTADO (RAP)</th>
                         <th class="base-col hours-col">HORAS DIRECTAS</th>
                         <th class="base-col days-col">DÍAS ASIGNADOS</th>
                         <th v-for="col in extraColumns" :key="col.key" class="extra-header">{{ col.label }}</th>
@@ -141,9 +141,8 @@
                               </td>
                               <!--asignacion de resultado y actividad-->
                               <td class="base-cell">
-                                <div class="text-weight-bolder small">RAP: {{ rap.description || '—' }}</div>
-                                <div class="activity-box"><strong>Actividad:</strong> {{ act.description ||
-                                  act.observations || 'Sin descripción' }}</div>
+                                <div class="text-weight-bold small">RAP: {{ rap.description || '—' }}</div>
+                                
                               </td>
                               <!--asignacion de horas directas-->
                               <td class="base-cell text-center">

@@ -214,7 +214,7 @@ async function main() {
                 tend: matchedSchedule.tend || null,
                 hoursPerDay: matchedSchedule.hourswork || 0,
                 calendarNotes: `Programado del ${startDateStr} al ${endDateStr}`,
-                isPublished: true,
+                isPublished: false,
               };
 
               seActualizoAlgo = true;

@@ -942,7 +942,10 @@ export const extractFromPDFs = async (req, res) => {
                                   tend: matchedSchedule.tend || null,
                                   hoursPerDay: matchedSchedule.hourswork || 0,
                                   calendarNotes: `Programado del ${startDateStr} al ${endDateStr}`,
-                                  isPublished: true,
+                                  // Importación de horarios legados: NO es
+                                  // publicación oficial. Solo "Programar en
+                                  // Calendario" marca isPublished = true.
+                                  isPublished: false,
                                 };
                               },
                             );

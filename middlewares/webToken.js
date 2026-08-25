@@ -9,6 +9,14 @@ import Instructor from "../models/Instructor.js";
 
 const webToken = {};
 
+webToken.decodeAnyToken = async (token) => {
+  if (!token) throw new Error("No se ha enviado el token");
+
+  return jwt.verify(token, process.env.JWT_SECRET, {
+    algorithms: ["HS256"],
+  });
+};
+
 /**
  * Generates a web token.
  * @async

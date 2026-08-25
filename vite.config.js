@@ -21,5 +21,11 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0'
+  },
+  build: {
+    // Le indica a Vite que envíe los archivos compilados a la carpeta 'public'
+    outDir: 'public',
+    // 'false' evita que borre otros archivos estáticos si los tienes dentro de public/
+    emptyOutDir: false
   }
 });

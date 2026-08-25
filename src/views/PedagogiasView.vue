@@ -269,15 +269,38 @@
                                 </template>
                               </td>
                               <td class="confirm-cell">
+                                <div class="column items-center q-gutter-xs">
+                                  <q-btn
+                                    v-if="!isActivityConfirmed(act)"
+                                    outline
+                                    color="green-9"
+                                    icon="check"
+                                    label="Confirmar"
+                                    no-caps
+                                    dense
+                                    class="confirm-action-btn full-width"
+                                    @click="confirmActivity(act)"
+                                  />
 
-                                <q-btn v-if="!isActivityConfirmed(act)" outline color="green-9" icon="check"
-                                  label="Confirmar" no-caps dense @click="confirmActivity(act)" />
+                                  <q-badge v-else color="green-9" class="confirmed-badge full-width justify-center">
+                                    <q-icon name="check_circle" size="15px" class="q-mr-xs" />
+                                    Revisado
+                                  </q-badge>
 
-                                <q-badge v-else color="green-9" class="confirmed-badge">
-                                  <q-icon name="check_circle" size="16px" class="q-mr-xs" />
-                                  Revisado
-                                </q-badge>
-
+                                  <q-btn
+                                    :outline="!(act.comments && act.comments.length > 0)"
+                                    :unelevated="!!(act.comments && act.comments.length > 0)"
+                                    dense
+                                    no-caps
+                                    :color="act.comments?.length ? 'green-8' : 'blue-grey-7'"
+                                    icon="chat"
+                                    :label="act.comments?.length ? `Comentarios (${act.comments.length})` : 'Comentarios'"
+                                    class="comments-action-btn full-width"
+                                    @click="openCommentsDialog(act, comp, rap, phase)"
+                                  >
+                                    <q-tooltip class="bg-grey-9">Ver y agregar comentarios de esta actividad</q-tooltip>
+                                  </q-btn>
+                                </div>
                               </td>
                             </tr>
                           </template>
@@ -358,13 +381,135 @@
 
         <!-- BOTÓN CERRAR -->
         <q-card-actions align="right">
-
           <q-btn flat label="CERRAR" color="green-9" @click="showReadMore = false" />
-
         </q-card-actions>
-
       </q-card>
+    </q-dialog>
 
+    <!-- DIÁLOGO DE COMENTARIOS POR FILA -->
+    <q-dialog v-model="showCommentsDialog" persistent>
+      <q-card class="comments-dialog-card bg-white">
+        <!-- TÍTULO / HEADER -->
+        <q-card-section class="bg-green-9 text-white row items-center justify-between q-py-md">
+          <div class="row items-center q-gutter-sm">
+            <q-icon name="forum" size="26px" />
+            <div>
+              <div class="text-h6 text-weight-bolder leading-tight">COMENTARIOS DE REVISIÓN</div>
+              <div class="text-caption text-green-1">Observaciones y retroalimentación de la fila seleccionada</div>
+            </div>
+          </div>
+          <q-btn flat round dense icon="close" color="white" v-close-popup :disable="savingComment" />
+        </q-card-section>
+
+        <!-- INFORMACIÓN DE CONTEXTO DE LA FILA -->
+        <q-card-section class="q-pa-sm bg-grey-2 border-bottom">
+          <div class="comments-context-box q-pa-sm text-caption">
+            <div class="row q-col-gutter-xs">
+              <div class="col-12 col-md-4">
+                <span class="text-weight-bold text-green-10">Fase:</span>
+                <span class="text-grey-9 q-ml-xs">{{ phaseLabel(currentCommentsContext.phase) }}</span>
+              </div>
+              <div class="col-12 col-md-8">
+                <span class="text-weight-bold text-green-10">Competencia:</span>
+                <span class="text-grey-9 q-ml-xs">{{ currentCommentsContext.compCode }} - {{ currentCommentsContext.compName }}</span>
+              </div>
+              <div class="col-12">
+                <span class="text-weight-bold text-green-10">RAP:</span>
+                <span class="text-grey-9 q-ml-xs">{{ currentCommentsContext.rapDesc }}</span>
+              </div>
+              <div class="col-12">
+                <span class="text-weight-bold text-green-10">Actividad:</span>
+                <span class="text-grey-9 q-ml-xs text-weight-medium">{{ currentCommentsContext.actDesc }}</span>
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+
+        <!-- LISTA DE COMENTARIOS -->
+        <q-card-section class="q-pa-md comments-list-scroll">
+          <div v-if="!currentCommentsActivity?.comments?.length" class="empty-comments-container text-center q-py-lg">
+            <q-icon name="chat_bubble_outline" size="52px" color="grey-5" />
+            <div class="text-subtitle1 text-grey-7 text-weight-bold q-mt-sm">No hay comentarios aún</div>
+            <div class="text-caption text-grey-6">Sé el primero en agregar una observación o retroalimentación sobre esta actividad.</div>
+          </div>
+
+          <div v-else class="column q-gutter-y-sm">
+            <div
+              v-for="(c, cIdx) in currentCommentsActivity.comments"
+              :key="c.id || cIdx"
+              class="comment-card q-pa-sm bg-grey-1"
+            >
+              <div class="row items-center justify-between q-mb-xs">
+                <div class="row items-center q-gutter-xs">
+                  <q-avatar size="24px" color="green-9" text-color="white" icon="person" font-size="14px" />
+                  <span class="text-weight-bold text-green-10 text-body2">{{ c.author || 'Usuario' }}</span>
+                  <q-badge v-if="c.role" outline color="green-8" class="text-bold" style="font-size: 10px;">
+                    {{ c.role }}
+                  </q-badge>
+                </div>
+                <div class="row items-center q-gutter-xs">
+                  <span class="text-caption text-grey-6">{{ formatCommentDate(c.createdAt) }}</span>
+                  <q-btn
+                    flat
+                    round
+                    dense
+                    icon="delete_outline"
+                    size="sm"
+                    color="red-7"
+                    :disable="savingComment"
+                    @click="deleteCommentFromActivity(cIdx)"
+                  >
+                    <q-tooltip class="bg-grey-9">Eliminar comentario</q-tooltip>
+                  </q-btn>
+                </div>
+              </div>
+
+              <div class="comment-text q-pl-sm text-grey-9">
+                {{ c.text }}
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <!-- FORMULARIO PARA AGREGAR NUEVO COMENTARIO -->
+        <q-card-section class="q-pa-md bg-white">
+          <div class="text-subtitle2 text-weight-bold text-green-10 q-mb-xs">
+            Agregar nuevo comentario:
+          </div>
+          <q-input
+            v-model="newCommentText"
+            type="textarea"
+            outlined
+            dense
+            autogrow
+            placeholder="Escribe tu observación o comentario sobre esta actividad..."
+            :disable="savingComment"
+            rows="2"
+            maxlength="1000"
+            counter
+          >
+            <template #after>
+              <q-btn
+                unelevated
+                color="green-9"
+                icon="send"
+                label="Guardar"
+                class="full-height text-weight-bold"
+                :loading="savingComment"
+                :disable="!newCommentText.trim() || savingComment"
+                @click="addCommentToActivity"
+              />
+            </template>
+          </q-input>
+        </q-card-section>
+
+        <!-- FOOTER / ACCIONES -->
+        <q-card-actions align="right" class="bg-grey-2 q-px-md q-py-sm">
+          <q-btn flat label="Cerrar" color="grey-8" class="text-weight-bold" v-close-popup :disable="savingComment" />
+        </q-card-actions>
+      </q-card>
     </q-dialog>
   </q-layout>
 </template>
@@ -376,6 +521,7 @@ import { useRouter } from 'vue-router';
 import { PlanningService } from '../services/planning.service';
 import { NotificationService } from '../services/notification.service';
 import { storeUser } from '../store/users.js';
+import jwt_decode from 'jwt-decode';
 
 const $q = useQuasar();
 const router = useRouter();
@@ -389,6 +535,174 @@ const selectedPlanning = ref(null);
 const notifications = ref([]);
 const showEditor = ref(false);
 const editorTarget = ref(null);
+
+const showCommentsDialog = ref(false);
+const currentCommentsActivity = ref(null);
+const currentCommentsContext = ref({
+  phase: '',
+  compCode: '',
+  compName: '',
+  rapDesc: '',
+  actDesc: ''
+});
+const newCommentText = ref('');
+const savingComment = ref(false);
+
+const getCurrentUserInfo = () => {
+  const token = userStore.token;
+  let name = userStore.instructorData?.name || userStore.newConsult?.name || '';
+  let role = typeof userStore.getRole === 'function' ? userStore.getRole() : (userStore.rol || 'USUARIO');
+  let email = userStore.email || '';
+
+  if (token) {
+    try {
+      const decoded = jwt_decode(token);
+      if (decoded) {
+        name = name || decoded.name || decoded.nombre || '';
+        role = decoded.rol || role;
+        email = email || decoded.email || '';
+      }
+    } catch (e) {
+      console.warn('Error decodificando token en comentarios:', e);
+    }
+  }
+
+  if (!name) {
+    name = email ? email.split('@')[0] : 'Usuario';
+  }
+
+  return {
+    name,
+    role: String(role || 'USUARIO').toUpperCase(),
+    email
+  };
+};
+
+const formatCommentDate = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleString('es-CO', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return dateStr;
+  }
+};
+
+// Modificación hecha por Llanos: Gestión y persistencia de comentarios de retroalimentación por actividad
+const openCommentsDialog = (act, comp, rap, phase) => {
+  if (!act.comments) {
+    act.comments = [];
+  }
+  currentCommentsActivity.value = act;
+  currentCommentsContext.value = {
+    phase: phase?.phase || '',
+    compCode: comp?.code || '',
+    compName: comp?.name || '',
+    rapDesc: rap?.description || '',
+    actDesc: act?.description || 'Sin descripción'
+  };
+  newCommentText.value = '';
+  showCommentsDialog.value = true;
+};
+
+const addCommentToActivity = async () => {
+  const text = newCommentText.value.trim();
+  if (!text || !currentCommentsActivity.value) return;
+
+  if (!Array.isArray(currentCommentsActivity.value.comments)) {
+    currentCommentsActivity.value.comments = [];
+  }
+
+  const userInfo = getCurrentUserInfo();
+  const comment = {
+    id: 'comm_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+    text,
+    author: userInfo.name,
+    authorEmail: userInfo.email,
+    role: userInfo.role,
+    createdAt: new Date().toISOString()
+  };
+
+  currentCommentsActivity.value.comments.push(comment);
+  savingComment.value = true;
+
+  try {
+    if (!selectedPlanning.value?.pedagogicalPlanning) {
+      throw new Error('No hay planeación seleccionada');
+    }
+    await PlanningService.saveDraft({
+      pedagogicalPlanning: selectedPlanning.value.pedagogicalPlanning
+    });
+
+    newCommentText.value = '';
+    $q.notify({
+      message: 'Comentario guardado en la base de datos.',
+      color: 'green-9',
+      icon: 'check_circle',
+      position: 'top'
+    });
+  } catch (error) {
+    console.error('Error al guardar comentario:', error);
+    const index = currentCommentsActivity.value.comments.indexOf(comment);
+    if (index !== -1) {
+      currentCommentsActivity.value.comments.splice(index, 1);
+    }
+    $q.notify({
+      message: 'Error al guardar el comentario en la base de datos.',
+      color: 'red-8',
+      icon: 'error',
+      position: 'top'
+    });
+  } finally {
+    savingComment.value = false;
+  }
+};
+
+const deleteCommentFromActivity = (commentIndex) => {
+  if (!currentCommentsActivity.value?.comments) return;
+
+  $q.dialog({
+    title: 'Eliminar Comentario',
+    message: '¿Estás seguro de que deseas eliminar este comentario?',
+    cancel: { label: 'Cancelar', flat: true, color: 'grey-7' },
+    ok: { label: 'Eliminar', color: 'red-8' },
+    persistent: true
+  }).onOk(async () => {
+    const removedComment = currentCommentsActivity.value.comments.splice(commentIndex, 1)[0];
+    savingComment.value = true;
+    try {
+      await PlanningService.saveDraft({
+        pedagogicalPlanning: selectedPlanning.value.pedagogicalPlanning
+      });
+      $q.notify({
+        message: 'Comentario eliminado de la base de datos.',
+        color: 'grey-9',
+        icon: 'delete',
+        position: 'top'
+      });
+    } catch (error) {
+      console.error('Error al eliminar comentario:', error);
+      if (removedComment) {
+        currentCommentsActivity.value.comments.splice(commentIndex, 0, removedComment);
+      }
+      $q.notify({
+        message: 'Error al eliminar el comentario de la base de datos.',
+        color: 'red-8',
+        icon: 'error',
+        position: 'top'
+      });
+    } finally {
+      savingComment.value = false;
+    }
+  });
+};
 
 const showReadMore = ref(false);
 const readMoreTitle = ref('');
@@ -433,14 +747,28 @@ const isActivityConfirmed = (act) => {
   return act.reviewed === true;
 };
 
-const confirmActivity = (act) => {
+const confirmActivity = async (act) => {
   act.reviewed = true;
 
-  $q.notify({
-    message: 'Actividad confirmada como revisada.',
-    color: 'green-9',
-    icon: 'check_circle'
-  });
+  try {
+    if (selectedPlanning.value?.pedagogicalPlanning) {
+      await PlanningService.saveDraft({
+        pedagogicalPlanning: selectedPlanning.value.pedagogicalPlanning
+      });
+    }
+    $q.notify({
+      message: 'Actividad confirmada como revisada.',
+      color: 'green-9',
+      icon: 'check_circle'
+    });
+  } catch (error) {
+    console.error('Error al persistir confirmación:', error);
+    $q.notify({
+      message: 'Actividad confirmada localmente, pero ocurrió un error al guardar.',
+      color: 'orange-8',
+      icon: 'warning'
+    });
+  }
 };
 
 const editor = reactive({
@@ -758,64 +1086,78 @@ onMounted(async () => {
 .confirm-header {
   background: #f5f5f5;
   color: #333;
-  width: 150px;
-  min-width: 150px;
-  max-width: 150px;
+  width: 160px;
+  min-width: 160px;
+  max-width: 160px;
   text-align: center;
 }
 
 .confirm-cell {
   background: #fff;
-  width: 150px;
-  min-width: 150px;
-  max-width: 150px;
+  width: 160px;
+  min-width: 160px;
+  max-width: 160px;
   text-align: center;
   vertical-align: middle !important;
+  padding: 6px 4px !important;
 }
 
 .confirmed-badge {
-  padding: 7px 10px;
+  padding: 6px 8px;
   font-weight: 700;
+  font-size: 11px;
 }
 
-.read-more-content {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 20px;
+.confirm-action-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 6px;
 }
 
-.read-more-list {
-  margin: 0;
-  padding-left: 25px;
+.comments-action-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 4px;
 }
 
-.read-more-list li {
-  margin-bottom: 12px;
-  line-height: 1.6;
-  font-size: 15px;
-  color: #333;
-}
-
-.read-more-dialog {
+.comments-dialog-card {
   width: 700px;
-  max-width: 90vw;
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.read-more-content {
-  max-height: 60vh;
+.comments-context-box {
+  background-color: #f1f8e9;
+  border-left: 4px solid #2e7d32;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.comments-list-scroll {
+  max-height: 320px;
   overflow-y: auto;
-  padding: 20px;
 }
 
-.read-more-list {
-  margin: 0;
-  padding-left: 25px;
+.comment-card {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #ffffff;
+  transition: all 0.2s ease;
 }
 
-.read-more-list li {
-  margin-bottom: 12px;
-  line-height: 1.6;
-  font-size: 15px;
+.comment-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.comment-text {
+  font-size: 13px;
+  line-height: 1.5;
   color: #333;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 </style>

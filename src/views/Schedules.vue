@@ -205,11 +205,6 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-12">
-        <Calander />
-      </div>
-    </div>
   </div>
 </template>
 
@@ -228,7 +223,7 @@ let isLoadingFiche = ref(true);
 let isLoadingData = ref(false);
 let optionsFiches = ref([]);
 let filterOptionsFiche = ref([]);
-let rows = ref();
+let rows = ref([]);
 let allData = ref([]);
 let intructorSelected = ref({
   label: "Todos",
@@ -244,43 +239,81 @@ let filterOutcomes = ref([]);
 
 onBeforeMount(async () => {
   await getFiches();
+  if (filterOptionsFiche.value.length > 0) {
+    ficheSelected.value = filterOptionsFiche.value[0];
+    await searchSchedule();
+  }
 });
 
 const getFiches = async () => {
   isLoadingFiche.value = true;
-  const res = await get("/fiches?status=0");
-  res.forEach((row, index) => {
-    optionsFiches.value.push({
-      label: `${row.number} ${row.program.name}`,
-      value: row,
+  try {
+    const res = await get("/fiches?status=0");
+    optionsFiches.value = (Array.isArray(res) ? res : []).map((row) => {
+      const programName = row.program?.name || "Programa sin nombre";
+      return {
+        label: `${row.number} ${programName}`,
+        value: row,
+      };
     });
     filterOptionsFiche.value = optionsFiches.value;
-  });
-  isLoadingFiche.value = false;
+  } catch (error) {
+    optionsFiches.value = [];
+    filterOptionsFiche.value = [];
+    $q.notify({
+      message: "No se puede conectar con el servidor de horarios.",
+      color: "red-8",
+      icon: "cloud_off",
+    });
+  } finally {
+    isLoadingFiche.value = false;
+  }
 };
 
 const searchSchedule = async () => {
-  isLoadingData.value = true;
+  const ficheId = ficheSelected.value?.value?._id;
+  if (!ficheId) {
+    rows.value = [];
+    allData.value = [];
+    return;
+  }
 
-  rows.value = await get(
-    `/schedules/fiche/${ficheSelected.value.value._id}`
-  );
-  allData.value = rows.value;
-  isLoadingData.value = false;
+  isLoadingData.value = true;
+  try {
+    const data = await get(`/schedules/fiche/${ficheId}`);
+    rows.value = Array.isArray(data) ? data : [];
+    allData.value = rows.value;
+  } catch (error) {
+    rows.value = [];
+    allData.value = [];
+    $q.notify({
+      message:
+        error.response?.data?.msg ||
+        error.response?.data?.message ||
+        "No fue posible cargar los horarios de la ficha.",
+      color: "red-8",
+      icon: "error",
+    });
+  } finally {
+    isLoadingData.value = false;
+  }
 };
 
 let columns = ref([
   {
     name: "instructor",
     label: "INSTRUCTOR",
-    field: (row) => row.instructor.name,
+    field: (row) => row.instructor?.name || "No disponible",
     align: "center",
     sortable: true,
   },
   {
     name: "program",
     label: "PROGRAMA",
-    field: (row) => `${row.program.name} ${row.program.code}`,
+    field: (row) =>
+      row.program
+        ? `${row.program.name || ""} ${row.program.code || ""}`.trim()
+        : "No disponible",
     align: "center",
     style:
       "max-width: 150px; white-space: nowrap; text-overflow: ellipsis !important;overflow: hidden;",
@@ -288,7 +321,7 @@ let columns = ref([
   {
     name: "results",
     label: "RESULTADOS",
-    field: (row) => row.outcome.outcomes,
+    field: (row) => row.outcome?.outcomes || "No disponible",
     align: "center",
     style:
       "max-width: 150px; white-space: nowrap; text-overflow: ellipsis !important;overflow: hidden;",
@@ -297,7 +330,7 @@ let columns = ref([
   {
     name: "environment",
     label: "AMBIENTE",
-    field: (row) => row.environment.name,
+    field: (row) => row.environment?.name || "No disponible",
     align: "center",
     style:
       "max-width: 150px; white-space: nowrap; text-overflow: ellipsis !important;overflow: hidden;",
@@ -305,7 +338,7 @@ let columns = ref([
   {
     name: "fiche",
     label: "FICHA",
-    field: (row) => row.fiche.number,
+    field: (row) => row.fiche?.number || "No disponible",
     align: "center",
   },
 
@@ -373,15 +406,17 @@ function searchInstructor() {
     };
     //selecionar todas las programaciones de la ficha según el resultado
     rows.value = allData.value.filter(
-      (item) => item.outcome._id == outcomeSelected.value.value
+      (item) => item.outcome?._id == outcomeSelected.value.value
     );
 
     //listar los instructores del o los resultados elegidos
     rows.value.forEach((item) => {
-      filterInstructors.value.push({
-        label: item.instructor.name,
-        value: item.instructor._id,
-      });
+      if (item.instructor?._id) {
+        filterInstructors.value.push({
+          label: item.instructor.name || "No disponible",
+          value: item.instructor._id,
+        });
+      }
     });
   }
 }
@@ -395,21 +430,21 @@ function searchDataInstructor() {
     } else {
       //selecionar todas las programaciones de la ficha según el resultado
       rows.value = allData.value.filter(
-        (item) => item.outcome._id == outcomeSelected.value.value
+        (item) => item.outcome?._id == outcomeSelected.value.value
       );
     }
   } else {
     if (outcomeSelected.value.value == 0) {
       //selecionar todas las programaciones de la ficha según el resultado
       rows.value = allData.value.filter(
-        (item) => item.instructor._id == intructorSelected.value.value
+        (item) => item.instructor?._id == intructorSelected.value.value
       );
     } else {
       //selecionar todas las programaciones de la ficha según el resultado
       rows.value = allData.value.filter(
         (item) =>
-          item.outcome._id == outcomeSelected.value.value &&
-          item.instructor._id == intructorSelected.value.value
+          item.outcome?._id == outcomeSelected.value.value &&
+          item.instructor?._id == intructorSelected.value.value
       );
     }
   }
@@ -426,10 +461,12 @@ function filterOutco(val, update, abort) {
       ];
 
       allData.value.forEach((item) => {
-        filterOutcomes.value.push({
-          label: item.outcome.outcomes,
-          value: item.outcome._id,
-        });
+        if (item.outcome?._id) {
+          filterOutcomes.value.push({
+            label: item.outcome.outcomes || "No disponible",
+            value: item.outcome._id,
+          });
+        }
       });
     });
   } else {
@@ -455,10 +492,10 @@ function filterInstru(val, update, abort) {
       //agregar los instructores de la ficha sin repetir en el select
       let array = [];
       rows.value.forEach((item) => {
-        if (!array.includes(item.instructor._id)) {
+        if (item.instructor?._id && !array.includes(item.instructor._id)) {
           array.push(item.instructor._id);
           filterInstructors.value.push({
-            label: item.instructor.name,
+            label: item.instructor.name || "No disponible",
             value: item.instructor._id,
           });
         }

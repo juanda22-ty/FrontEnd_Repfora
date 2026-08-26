@@ -338,7 +338,7 @@ class Server {
    * Adds middlewares to the server.
    */
   middlewares() {
-    this.app.use(express.json({ limit: "25mb" }));
+    this.app.use(express.json());
     this.app.use(      cors()    );
     this.app.use(morgan("dev"));
     this.app.use(express.static("public"));

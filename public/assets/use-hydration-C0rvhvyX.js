@@ -1,1 +1,0 @@
-import{lt as e,z as t}from"./use-quasar-D0BIyjbC.js";import{ct as n}from"./use-dark-BLWXh20O.js";function r(){let r=e(!n.value);return r.value||t(()=>{r.value=!0}),{isHydrated:r}}export{r as t};

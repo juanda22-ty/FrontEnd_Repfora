@@ -205,6 +205,11 @@
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-12">
+        <Calander />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -223,7 +228,7 @@ let isLoadingFiche = ref(true);
 let isLoadingData = ref(false);
 let optionsFiches = ref([]);
 let filterOptionsFiche = ref([]);
-let rows = ref([]);
+let rows = ref();
 let allData = ref([]);
 let intructorSelected = ref({
   label: "Todos",
@@ -239,64 +244,29 @@ let filterOutcomes = ref([]);
 
 onBeforeMount(async () => {
   await getFiches();
-  if (filterOptionsFiche.value.length > 0) {
-    ficheSelected.value = filterOptionsFiche.value[0];
-    await searchSchedule();
-  }
 });
 
 const getFiches = async () => {
   isLoadingFiche.value = true;
-  try {
-    const res = await get("/fiches?status=0");
-    optionsFiches.value = (Array.isArray(res) ? res : []).map((row) => {
-      const programName = row.program?.name || "Programa sin nombre";
-      return {
-        label: `${row.number} ${programName}`,
-        value: row,
-      };
+  const res = await get("/fiches?status=0");
+  res.forEach((row, index) => {
+    optionsFiches.value.push({
+      label: `${row.number} ${row.program.name}`,
+      value: row,
     });
     filterOptionsFiche.value = optionsFiches.value;
-  } catch (error) {
-    optionsFiches.value = [];
-    filterOptionsFiche.value = [];
-    $q.notify({
-      message: "No se puede conectar con el servidor de horarios.",
-      color: "red-8",
-      icon: "cloud_off",
-    });
-  } finally {
-    isLoadingFiche.value = false;
-  }
+  });
+  isLoadingFiche.value = false;
 };
 
 const searchSchedule = async () => {
-  const ficheId = ficheSelected.value?.value?._id;
-  if (!ficheId) {
-    rows.value = [];
-    allData.value = [];
-    return;
-  }
-
   isLoadingData.value = true;
-  try {
-    const data = await get(`/schedules/fiche/${ficheId}`);
-    rows.value = Array.isArray(data) ? data : [];
-    allData.value = rows.value;
-  } catch (error) {
-    rows.value = [];
-    allData.value = [];
-    $q.notify({
-      message:
-        error.response?.data?.msg ||
-        error.response?.data?.message ||
-        "No fue posible cargar los horarios de la ficha.",
-      color: "red-8",
-      icon: "error",
-    });
-  } finally {
-    isLoadingData.value = false;
-  }
+
+  rows.value = await get(
+    `/schedules/fiche/${ficheSelected.value.value._id}`
+  );
+  allData.value = rows.value;
+  isLoadingData.value = false;
 };
 
 let columns = ref([

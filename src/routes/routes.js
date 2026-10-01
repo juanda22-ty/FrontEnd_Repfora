@@ -330,11 +330,6 @@ export const routes = [
     component: () => import("../views/ResetPassword.vue"),
   },
   {
-    path: "/test",
-    name: "test",
-    component: () => import("../views/test.vue"),
-  },
-  {
     path: "/registernew/form",
     name: "registernew",
     component: () => import("../views/RegisterNew.vue"),

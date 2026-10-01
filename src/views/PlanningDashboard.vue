@@ -14,168 +14,140 @@
     </div>
 
     <!-- ─── ADMINISTRATOR / COORDINATOR / PROGRAMMER VIEW (4 Cards) ─── -->
-    <div v-if="isProgramador" class="row justify-center my-row cards-container"
-      :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-md'">
-      <!-- Card 1: Nueva Planeación -->
-      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
-        <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
-          <div>
-            <q-card-section class="card_style q-py-sm">
-              <div class="row items-center justify-center">
-                <div class="text-h6 style-text">
-                  Nueva Planeación
-                </div>
-              </div>
-            </q-card-section>
-            <q-separator />
-            <div class="justify-center flex q-my-sm">
-              <img src="/images/calendar.png" class="img-card" alt="Nueva Planeación" />
+<div v-if="isProgramador" class="row justify-center my-row">
+  <!-- Card 1: Nueva Planeación -->
+  <div class="col-8 col-sm-4 col-md-3 q-mx-xl q-my-xl flex">
+    <q-card class="my-card-1 text-center shadow-5 full-width column justify-between">
+      <div>
+        <q-card-section class="card_style q-py-sm">
+          <div class="row items-center justify-center">
+            <div class="text-h6 style-text">
+              Nueva Planeación
             </div>
-            <q-separator />
-            <q-card-section class="q-pa-md text-center text-body2 text-grey-7">
-              Cargue de programas oficiales, cruce automático con proyecto formativo y diseño del plan de sesiones.
-            </q-card-section>
           </div>
-          <div>
-            <q-separator />
-            <router-link to="/extract" style="text-decoration: none; color: black">
-              <q-card-actions class="column items-center q-mt-sm q-pb-md">
-                <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
-              </q-card-actions>
-            </router-link>
-          </div>
-        </q-card>
+        </q-card-section>
+        <q-separator />
+        <div class="justify-center flex q-my-sm">
+          <img src="/images/calendar.png" class="img-card" alt="Nueva Planeación" />
+        </div>
       </div>
+      <div>
+        <q-separator />
+        <router-link to="/extract" style="text-decoration: none; color: black">
+          <q-card-actions class="column items-center q-mt-sm q-pb-md">
+            <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
+          </q-card-actions>
+        </router-link>
+      </div>
+    </q-card>
+  </div>
 
-      <!-- Card 2: Programador -->
-      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
-        <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
-          <div>
-            <q-card-section class="card_style q-py-sm">
-              <div class="row items-center justify-center">
-                <div class="text-h6 style-text">
-                  Programador
-                </div>
-              </div>
-            </q-card-section>
-            <q-separator />
-            <div class="justify-center flex q-my-sm">
-              <img src="/images/instructor.png" class="img-card" alt="Programador" />
+  <!-- Card 2: Programador -->
+  <div class="col-8 col-sm-4 col-md-3 q-mx-xl q-my-xl flex">
+    <q-card class="my-card-1 text-center shadow-5 full-width column justify-between">
+      <div>
+        <q-card-section class="card_style q-py-sm">
+          <div class="row items-center justify-center">
+            <div class="text-h6 style-text">
+              Programador
             </div>
-            <q-separator />
-            <q-card-section class="q-pa-md text-center text-body2 text-grey-7">
-              Gestión integral de instructores, control de disponibilidades horarias y cruce inteligente de fichas.
-            </q-card-section>
           </div>
-          <div>
-            <q-separator />
-            <router-link to="/scheduler" style="text-decoration: none; color: black">
-              <q-card-actions class="column items-center q-mt-sm q-pb-md">
-                <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
-              </q-card-actions>
-            </router-link>
-          </div>
-        </q-card>
+        </q-card-section>
+        <q-separator />
+        <div class="justify-center flex q-my-sm">
+          <img src="/images/instructor.png" class="img-card" alt="Programador" />
+        </div>
       </div>
+      <div>
+        <q-separator />
+        <router-link to="/scheduler" style="text-decoration: none; color: black">
+          <q-card-actions class="column items-center q-mt-sm q-pb-md">
+            <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
+          </q-card-actions>
+        </router-link>
+      </div>
+    </q-card>
+  </div>
 
-      <!-- Card 3: Pedagogías -->
-      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
-        <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
-          <div>
-            <q-card-section class="card_style q-py-sm">
-              <div class="row items-center justify-center">
-                <div class="text-h6 style-text">Pedagogías</div>
-              </div>
-            </q-card-section>
-            <q-separator />
-            <div class="justify-center flex q-my-sm">
-              <img src="/images/competencia.png" class="img-card" alt="Pedagogías" />
+  <!-- Card 3: Pedagogías -->
+  <div class="col-8 col-sm-4 col-md-3 q-mx-xl q-my-xl flex">
+    <q-card class="my-card-1 text-center shadow-5 full-width column justify-between">
+      <div>
+        <q-card-section class="card_style q-py-sm">
+          <div class="row items-center justify-center">
+            <div class="text-h6 style-text">Pedagogías</div>
+          </div>
+        </q-card-section>
+        <q-separator />
+        <div class="justify-center flex q-my-sm">
+          <img src="/images/competencia.png" class="img-card" alt="Pedagogías" />
+        </div>
+      </div>
+      <div>
+        <q-separator />
+        <router-link to="/pedagogias" style="text-decoration: none; color: black">
+          <q-card-actions class="column items-center q-mt-sm q-pb-md">
+            <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
+          </q-card-actions>
+        </router-link>
+      </div>
+    </q-card>
+  </div>
+
+  <!-- Card 4: Horarios -->
+  <div class="col-8 col-sm-4 col-md-3 q-mx-xl q-my-xl flex">
+    <q-card class="my-card-1 text-center shadow-5 full-width column justify-between">
+      <div>
+        <q-card-section class="card_style q-py-sm">
+          <div class="row items-center justify-center">
+            <div class="text-h6 style-text">
+              Horarios
             </div>
-            <q-separator />
-            <q-card-section class="q-pa-md text-center text-body2 text-grey-7">
-              Consulte la información de la planeación pedagógica, incluyendo saberes, criterios, evidencias, ambientes
-              y estrategias didácticas.
-            </q-card-section>
           </div>
-          <div>
-            <q-separator />
-            <router-link to="/pedagogias" style="text-decoration: none; color: black">
-              <q-card-actions class="column items-center q-mt-sm q-pb-md">
-                <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
-              </q-card-actions>
-            </router-link>
-          </div>
-        </q-card>
+        </q-card-section>
+        <q-separator />
+        <div class="justify-center flex q-my-sm">
+          <img src="/images/calendar.png" class="img-card" alt="Horarios" />
+        </div>
       </div>
+      <div>
+        <q-separator />
+        <router-link to="/planning-schedules" style="text-decoration: none; color: black">
+          <q-card-actions class="column items-center q-mt-sm q-pb-md">
+            <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
+          </q-card-actions>
+        </router-link>
+      </div>
+    </q-card>
+  </div>
 
-      <!-- Card 3: Horarios -->
-      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
-        <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
-          <div>
-            <q-card-section class="card_style q-py-sm">
-              <div class="row items-center justify-center">
-                <div class="text-h6 style-text">
-                  Horarios
-                </div>
-              </div>
-            </q-card-section>
-            <q-separator />
-            <div class="justify-center flex q-my-sm">
-              <img src="/images/calendar.png" class="img-card" alt="Horarios" />
+  <!-- Card 5: Jornadas -->
+  <div class="col-8 col-sm-4 col-md-3 q-mx-xl q-my-xl flex">
+    <q-card class="my-card-1 text-center shadow-5 full-width column justify-between">
+      <div>
+        <q-card-section class="card_style q-py-sm">
+          <div class="row items-center justify-center">
+            <div class="text-h6 style-text">
+              Jornadas
             </div>
-            <q-separator />
-            <q-card-section class="q-pa-md text-center text-body2 text-grey-7">
-              Configuración horaria de ambientes, fichas de formación, asuetos y actividades especiales.
-            </q-card-section>
           </div>
-          <div>
-            <q-separator />
-            <router-link to="/planning-schedules" style="text-decoration: none; color: black">
-              <q-card-actions class="column items-center q-mt-sm q-pb-md">
-                <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
-              </q-card-actions>
-            </router-link>
-          </div>
-        </q-card>
+        </q-card-section>
+        <q-separator />
+        <div class="justify-center flex q-my-sm">
+          <img src="/images/hours.png" class="img-card" alt="Jornadas" />
+        </div>
       </div>
-
-      <!-- Card 4: Jornadas -->
-      <div class="col-10 col-sm-6 col-md-4 col-lg-3 q-my-lg flex"
-        :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-lg'">
-        <q-card square class="my-card-1 text-center shadow-5 full-width column justify-between">
-          <div>
-            <q-card-section class="card_style q-py-sm">
-              <div class="row items-center justify-center">
-                <div class="text-h6 style-text">
-                  Jornadas
-                </div>
-              </div>
-            </q-card-section>
-            <q-separator />
-            <div class="justify-center flex q-my-sm">
-              <img src="/images/hours.png" class="img-card" alt="Jornadas" />
-            </div>
-            <q-separator />
-            <q-card-section class="q-pa-md text-center text-body2 text-grey-7">
-              Parametrización de jornadas horarias, horas por día y días permitidos de clase.
-            </q-card-section>
-          </div>
-          <div>
-            <q-separator />
-            <router-link to="/planning-shifts" style="text-decoration: none; color: black">
-              <q-card-actions class="column items-center q-mt-sm q-pb-md">
-                <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
-              </q-card-actions>
-            </router-link>
-          </div>
-        </q-card>
+      <div>
+        <q-separator />
+        <router-link to="/planning-shifts" style="text-decoration: none; color: black">
+          <q-card-actions class="column items-center q-mt-sm q-pb-md">
+            <q-btn square class="button_style" style="width: 50%"> VER </q-btn>
+          </q-card-actions>
+        </router-link>
       </div>
-    </div>
-
+    </q-card>
+  </div>
+</div>
     <!-- ─── INSTRUCTOR VIEW (2 Columns: Nueva Planeación + Mis Planeaciones) ─── -->
     <div v-else class="row justify-center my-row" :class="$q.screen.width < 500 ? 'q-px-none' : 'q-px-md'">
       <!-- Card 1: Nueva Planeación -->
@@ -382,6 +354,7 @@ onMounted(() => {
 .card_style {
   background-color: var(--color_card) !important;
   color: var(--color_text_card);
+
 }
 
 .cards-container {
@@ -440,5 +413,12 @@ onMounted(() => {
 .list-item-custom:hover {
   background-color: #f1f8e9;
   border-color: #c8e6c9;
+}
+
+.my-card-1 {
+  overflow: hidden;
+}
+.my-card-1 {
+  border-radius: 6px; /* el valor que confirmes */
 }
 </style>

@@ -11,7 +11,7 @@
         </q-toolbar-title>
         <q-btn flat round dense icon="notifications" class="q-mr-sm" to="/notifications">
           <q-badge v-if="unreadNotificationsCount > 0" floating color="orange" rounded>{{ unreadNotificationsCount
-            }}</q-badge>
+          }}</q-badge>
         </q-btn>
         <q-btn flat round dense icon="logout" @click="handleLogout">
           <q-tooltip class="bg-red-8">Cerrar Sesión</q-tooltip>
@@ -52,7 +52,7 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label class="text-subtitle2 text-weight-bold">Ficha: {{ plan.pedagogicalPlanning?.fiche
-                  }}</q-item-label>
+                }}</q-item-label>
                 <q-item-label caption lines="1"
                   :class="selectedPlanning?.pedagogicalPlanning?.fiche === plan.pedagogicalPlanning?.fiche ? 'text-green-1' : 'text-grey-7'">
                   {{ plan.pedagogicalPlanning?.metadata?.programName || 'Sin programa' }}
@@ -142,12 +142,12 @@
                               <!--asignacion de resultado y actividad-->
                               <td class="base-cell">
                                 <div class="text-weight-bold small">RAP: {{ rap.description || '—' }}</div>
-                                
+
                               </td>
                               <!--asignacion de horas directas-->
                               <td class="base-cell text-center">
                                 <q-badge outline color="green-9" class="text-weight-bold">{{ directHours(act)
-                                  }}h</q-badge>
+                                }}h</q-badge>
                               </td>
                               <!--asignacion de dias programados-->
                               <td class="base-cell">
@@ -211,12 +211,25 @@
 
                                 <!--asignacion de criterios de evaluacion-->
                                 <template v-else-if="col.key === 'criteria'">
-                                  {{ joinValue(
-                                    rap.evaluationCriteria?.length
-                                      ? rap.evaluationCriteria
-                                      : (comp.evaluationCriteria?.length ? comp.evaluationCriteria :
-                                        comp.criterios_de_evaluacion)
-                                  ) }}
+                                  <div class="text-preview">
+                                    {{ joinValue(
+                                      rap.evaluationCriteria?.length
+                                        ? rap.evaluationCriteria
+                                        : (comp.evaluationCriteria?.length ? comp.evaluationCriteria :
+                                          comp.criterios_de_evaluacion)
+                                    ) }}
+                                  </div>
+
+                                  <q-btn flat dense no-caps color="green-9" label="Leer más" class="read-more-btn"
+                                    @click="openReadMore(
+                                      joinValue(
+                                        rap.evaluationCriteria?.length
+                                          ? rap.evaluationCriteria
+                                          : (comp.evaluationCriteria?.length ? comp.evaluationCriteria :
+                                            comp.criterios_de_evaluacion)
+                                      ),
+                                      'Criterios de evaluación'
+                                    )" />
                                 </template>
 
                                 <!--asignacion de actividad de aprendizaje-->
@@ -236,7 +249,8 @@
 
                                 <!--asignacion de estrategias didacticas activas-->
                                 <template v-else-if="col.key === 'strategies'">
-                                  {{ joinValue(act.didacticStrategies || act.strategies || act.estrategiasDidacticas) || '—' }}
+                                  {{ joinValue(act.didacticStrategies || act.strategies || act.estrategiasDidacticas) ||
+                                    '—' }}
                                 </template>
 
                                 <!--asignacion de ambiente de aprendizaje-->
@@ -254,7 +268,15 @@
 
                                 <!--asignacion de materiales de formacion-->
                                 <template v-else-if="col.key === 'materials'">
-                                  {{ joinValue(act.trainingMaterials || act.materials || act.materiales) }}
+                                  <div class="text-preview">
+                                    {{ joinValue(act.trainingMaterials || act.materials || act.materiales) }}
+                                  </div>
+
+                                  <q-btn flat dense no-caps color="green-9" label="Leer más" class="read-more-btn"
+                                    @click="openReadMore(
+                                      joinValue(act.trainingMaterials || act.materials || act.materiales),
+                                      'Materiales de formación'
+                                    )" />
                                 </template>
 
                                 <!--asignacion de instructor responsable-->
@@ -270,34 +292,21 @@
                               </td>
                               <td class="confirm-cell">
                                 <div class="column items-center q-gutter-xs">
-                                  <q-btn
-                                    v-if="!isActivityConfirmed(act)"
-                                    outline
-                                    color="green-9"
-                                    icon="check"
-                                    label="Confirmar"
-                                    no-caps
-                                    dense
-                                    class="confirm-action-btn full-width"
-                                    @click="confirmActivity(act)"
-                                  />
+                                  <q-btn v-if="!isActivityConfirmed(act)" outline color="green-9" icon="check"
+                                    label="Confirmar" no-caps dense class="confirm-action-btn full-width"
+                                    @click="confirmActivity(act)" />
 
                                   <q-badge v-else color="green-9" class="confirmed-badge full-width justify-center">
                                     <q-icon name="check_circle" size="15px" class="q-mr-xs" />
                                     Revisado
                                   </q-badge>
 
-                                  <q-btn
-                                    :outline="!(act.comments && act.comments.length > 0)"
-                                    :unelevated="!!(act.comments && act.comments.length > 0)"
-                                    dense
-                                    no-caps
-                                    :color="act.comments?.length ? 'green-8' : 'blue-grey-7'"
-                                    icon="chat"
+                                  <q-btn :outline="!(act.comments && act.comments.length > 0)"
+                                    :unelevated="!!(act.comments && act.comments.length > 0)" dense no-caps
+                                    :color="act.comments?.length ? 'green-8' : 'blue-grey-7'" icon="chat"
                                     :label="act.comments?.length ? `Comentarios (${act.comments.length})` : 'Comentarios'"
                                     class="comments-action-btn full-width"
-                                    @click="openCommentsDialog(act, comp, rap, phase)"
-                                  >
+                                    @click="openCommentsDialog(act, comp, rap, phase)">
                                     <q-tooltip class="bg-grey-9">Ver y agregar comentarios de esta actividad</q-tooltip>
                                   </q-btn>
                                 </div>
@@ -411,7 +420,9 @@
               </div>
               <div class="col-12 col-md-8">
                 <span class="text-weight-bold text-green-10">Competencia:</span>
-                <span class="text-grey-9 q-ml-xs">{{ currentCommentsContext.compCode }} - {{ currentCommentsContext.compName }}</span>
+                <span class="text-grey-9 q-ml-xs">{{ currentCommentsContext.compCode }} - {{
+                  currentCommentsContext.compName
+                }}</span>
               </div>
               <div class="col-12">
                 <span class="text-weight-bold text-green-10">RAP:</span>
@@ -430,15 +441,14 @@
           <div v-if="!currentCommentsActivity?.comments?.length" class="empty-comments-container text-center q-py-lg">
             <q-icon name="chat_bubble_outline" size="52px" color="grey-5" />
             <div class="text-subtitle1 text-grey-7 text-weight-bold q-mt-sm">No hay comentarios aún</div>
-            <div class="text-caption text-grey-6">Sé el primero en agregar una observación o retroalimentación sobre esta actividad.</div>
+            <div class="text-caption text-grey-6">Sé el primero en agregar una observación o retroalimentación sobre
+              esta
+              actividad.</div>
           </div>
 
           <div v-else class="column q-gutter-y-sm">
-            <div
-              v-for="(c, cIdx) in currentCommentsActivity.comments"
-              :key="c.id || cIdx"
-              class="comment-card q-pa-sm bg-grey-1"
-            >
+            <div v-for="(c, cIdx) in currentCommentsActivity.comments" :key="c.id || cIdx"
+              class="comment-card q-pa-sm bg-grey-1">
               <div class="row items-center justify-between q-mb-xs">
                 <div class="row items-center q-gutter-xs">
                   <q-avatar size="24px" color="green-9" text-color="white" icon="person" font-size="14px" />
@@ -449,16 +459,8 @@
                 </div>
                 <div class="row items-center q-gutter-xs">
                   <span class="text-caption text-grey-6">{{ formatCommentDate(c.createdAt) }}</span>
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="delete_outline"
-                    size="sm"
-                    color="red-7"
-                    :disable="savingComment"
-                    @click="deleteCommentFromActivity(cIdx)"
-                  >
+                  <q-btn flat round dense icon="delete_outline" size="sm" color="red-7" :disable="savingComment"
+                    @click="deleteCommentFromActivity(cIdx)">
                     <q-tooltip class="bg-grey-9">Eliminar comentario</q-tooltip>
                   </q-btn>
                 </div>
@@ -478,29 +480,13 @@
           <div class="text-subtitle2 text-weight-bold text-green-10 q-mb-xs">
             Agregar nuevo comentario:
           </div>
-          <q-input
-            v-model="newCommentText"
-            type="textarea"
-            outlined
-            dense
-            autogrow
-            placeholder="Escribe tu observación o comentario sobre esta actividad..."
-            :disable="savingComment"
-            rows="2"
-            maxlength="1000"
-            counter
-          >
+          <q-input v-model="newCommentText" type="textarea" outlined dense autogrow
+            placeholder="Escribe tu observación o comentario sobre esta actividad..." :disable="savingComment" rows="2"
+            maxlength="1000" counter>
             <template #after>
-              <q-btn
-                unelevated
-                color="green-9"
-                icon="send"
-                label="Guardar"
-                class="full-height text-weight-bold"
-                :loading="savingComment"
-                :disable="!newCommentText.trim() || savingComment"
-                @click="addCommentToActivity"
-              />
+              <q-btn unelevated color="green-9" icon="send" label="Guardar" class="full-height text-weight-bold"
+                :loading="savingComment" :disable="!newCommentText.trim() || savingComment"
+                @click="addCommentToActivity" />
             </template>
           </q-input>
         </q-card-section>

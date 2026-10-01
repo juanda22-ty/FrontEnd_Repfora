@@ -303,14 +303,17 @@ let columns = ref([
   {
     name: "instructor",
     label: "INSTRUCTOR",
-    field: (row) => row.instructor.name,
+    field: (row) => row.instructor?.name || "No disponible",
     align: "center",
     sortable: true,
   },
   {
     name: "program",
     label: "PROGRAMA",
-    field: (row) => `${row.program.name} ${row.program.code}`,
+    field: (row) =>
+      row.program
+        ? `${row.program.name || ""} ${row.program.code || ""}`.trim()
+        : "No disponible",
     align: "center",
     style:
       "max-width: 150px; white-space: nowrap; text-overflow: ellipsis !important;overflow: hidden;",
@@ -318,7 +321,7 @@ let columns = ref([
   {
     name: "results",
     label: "RESULTADOS",
-    field: (row) => row.outcome.outcomes,
+    field: (row) => row.outcome?.outcomes || "No disponible",
     align: "center",
     style:
       "max-width: 150px; white-space: nowrap; text-overflow: ellipsis !important;overflow: hidden;",
@@ -327,7 +330,7 @@ let columns = ref([
   {
     name: "environment",
     label: "AMBIENTE",
-    field: (row) => row.environment.name,
+    field: (row) => row.environment?.name || "No disponible",
     align: "center",
     style:
       "max-width: 150px; white-space: nowrap; text-overflow: ellipsis !important;overflow: hidden;",
@@ -335,7 +338,7 @@ let columns = ref([
   {
     name: "fiche",
     label: "FICHA",
-    field: (row) => row.fiche.number,
+    field: (row) => row.fiche?.number || "No disponible",
     align: "center",
   },
 
@@ -403,15 +406,17 @@ function searchInstructor() {
     };
     //selecionar todas las programaciones de la ficha según el resultado
     rows.value = allData.value.filter(
-      (item) => item.outcome._id == outcomeSelected.value.value
+      (item) => item.outcome?._id == outcomeSelected.value.value
     );
 
     //listar los instructores del o los resultados elegidos
     rows.value.forEach((item) => {
-      filterInstructors.value.push({
-        label: item.instructor.name,
-        value: item.instructor._id,
-      });
+      if (item.instructor?._id) {
+        filterInstructors.value.push({
+          label: item.instructor.name || "No disponible",
+          value: item.instructor._id,
+        });
+      }
     });
   }
 }
@@ -425,21 +430,21 @@ function searchDataInstructor() {
     } else {
       //selecionar todas las programaciones de la ficha según el resultado
       rows.value = allData.value.filter(
-        (item) => item.outcome._id == outcomeSelected.value.value
+        (item) => item.outcome?._id == outcomeSelected.value.value
       );
     }
   } else {
     if (outcomeSelected.value.value == 0) {
       //selecionar todas las programaciones de la ficha según el resultado
       rows.value = allData.value.filter(
-        (item) => item.instructor._id == intructorSelected.value.value
+        (item) => item.instructor?._id == intructorSelected.value.value
       );
     } else {
       //selecionar todas las programaciones de la ficha según el resultado
       rows.value = allData.value.filter(
         (item) =>
-          item.outcome._id == outcomeSelected.value.value &&
-          item.instructor._id == intructorSelected.value.value
+          item.outcome?._id == outcomeSelected.value.value &&
+          item.instructor?._id == intructorSelected.value.value
       );
     }
   }
@@ -456,10 +461,12 @@ function filterOutco(val, update, abort) {
       ];
 
       allData.value.forEach((item) => {
-        filterOutcomes.value.push({
-          label: item.outcome.outcomes,
-          value: item.outcome._id,
-        });
+        if (item.outcome?._id) {
+          filterOutcomes.value.push({
+            label: item.outcome.outcomes || "No disponible",
+            value: item.outcome._id,
+          });
+        }
       });
     });
   } else {
@@ -485,10 +492,10 @@ function filterInstru(val, update, abort) {
       //agregar los instructores de la ficha sin repetir en el select
       let array = [];
       rows.value.forEach((item) => {
-        if (!array.includes(item.instructor._id)) {
+        if (item.instructor?._id && !array.includes(item.instructor._id)) {
           array.push(item.instructor._id);
           filterInstructors.value.push({
-            label: item.instructor.name,
+            label: item.instructor.name || "No disponible",
             value: item.instructor._id,
           });
         }
